@@ -9,13 +9,14 @@ export default class ModelAggregate<T> extends Aggregate {
    */
   public constructor(protected readonly model: any) {
     super(model.collection);
+    this.database = model.getStaticProperty("database");
   }
 
   /**
    * {@inheritDoc}
    */
   public async get(
-    mapData: (record: any) => any = record => new this.model(record),
+    mapData: (record: any) => any = (record) => new this.model(record)
   ) {
     return (await super.get(mapData)) as T[];
   }
@@ -39,7 +40,7 @@ export default class ModelAggregate<T> extends Aggregate {
    */
   public async paginate<G = T>(
     page = 1,
-    limit = 15,
+    limit = this.model.perPage
   ): Promise<PaginationListing<G>> {
     return await super.paginate<G>(page, limit);
   }

@@ -4,14 +4,12 @@
   "description": "Node Js Manager",
   "main": "src/index.ts",
   "dependencies": {
-    "@mongez/logger": "^1.0.1",
-    "mongodb": "^5.1.0",
-    "@mongez/reinforcements": "^2.3.0",
     "@mongez/events": "^2.0.0",
+    "@mongez/logger": "^1.0.1",
+    "@mongez/reinforcements": "^2.3.0",
     "@mongez/supportive-is": "^1.0.12",
-    "@mongez/password": "^1.0.2",
-    "@mongez/config": "^1.0.26",
-    "dayjs": "^1.11.7"
+    "dayjs": "^1.11.7",
+    "mongodb": "^5.1.0"
   },
   "scripts": {
     "update": "ncu -u",
@@ -27,7 +25,9 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
+    "chalk": "4",
     "commander": "^10.0.0",
+    "console-table-printer": "^2.11.1",
     "eslint": "^8.36.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-prettier": "^4.2.1",

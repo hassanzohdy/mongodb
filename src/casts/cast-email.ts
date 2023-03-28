@@ -1,3 +1,3 @@
-export default function castEmail(value: string) {
+export function castEmail(value: string) {
   return value.toLowerCase();
 }

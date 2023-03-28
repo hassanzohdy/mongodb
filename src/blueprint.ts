@@ -16,7 +16,7 @@ export default class BluePrint {
    */
   public static async index(
     columns: string | string[],
-    options: CreateIndexesOptions = {},
+    options: CreateIndexesOptions = {}
   ) {
     if (!Array.isArray(columns)) {
       columns = [columns];
@@ -31,7 +31,7 @@ export default class BluePrint {
         list[column] = 1;
         return list;
       },
-      {},
+      {}
     );
 
     return await this.collection().createIndex(columnsList, options);
@@ -42,7 +42,7 @@ export default class BluePrint {
    */
   public static async unique(
     column: string | string[],
-    options: CreateIndexesOptions = {},
+    options: CreateIndexesOptions = {}
   ) {
     options.unique = true;
     if (!Array.isArray(column)) {
@@ -61,7 +61,7 @@ export default class BluePrint {
    */
   public static async textIndex(
     column: string | string[],
-    options: CreateIndexesOptions = {},
+    options: CreateIndexesOptions = {}
   ) {
     options.unique = true;
 
@@ -86,7 +86,7 @@ export default class BluePrint {
    */
   public static async geoIndex(
     column: string | string[],
-    options: CreateIndexesOptions = {},
+    options: CreateIndexesOptions = {}
   ) {
     options.unique = true;
 

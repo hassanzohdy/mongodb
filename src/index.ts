@@ -1,17 +1,13 @@
-import connection, { DatabaseConfigurations } from "./connection";
+import connection from "./connection";
 import database from "./database";
 export * from "./aggregate";
 export { default as BluePrint } from "./blueprint";
+export * from "./config";
 export { Connection } from "./connection";
 export { Database } from "./database";
-export * from "./helpers";
 export { default as migrate } from "./migrate";
 export * from "./model";
-export { connection };
-export default database;
-
-export function connectToDatabase(
-  databaseConfigurations?: DatabaseConfigurations,
-) {
-  connection.connect(databaseConfigurations);
-}
+export * from "./types";
+export * from "./utils";
+export * from "./utils/listDatabaseIndexes";
+export { database, connection };

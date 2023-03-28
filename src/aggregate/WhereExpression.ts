@@ -42,7 +42,7 @@ export default class WhereExpression {
   public static parse(
     column: string,
     operator: WhereOperator,
-    value: any,
+    value: any
   ): Filter;
   public static parse(...args: any[]) {
     if (args.length === 1 && Is.plainObject(args[0])) return args[0];

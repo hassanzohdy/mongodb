@@ -24,9 +24,7 @@ export type ShapedArrayOfObject = {
  * Array of numbers
  * keywords: shapedArray(ShapedArrayType.Number)
  */
-export default function shapedArray(
-  shape: ShapedArrayType | ShapedArrayOfObject,
-) {
+export function shapedArray(shape: ShapedArrayType | ShapedArrayOfObject) {
   return (value: any) => {
     // because the model check if the value is an array, it will loop over it
     // so we'll get only one a value at a time

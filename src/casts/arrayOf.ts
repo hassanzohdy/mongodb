@@ -1,4 +1,4 @@
-export default function arrayOf(values: any[]) {
+export function arrayOf(values: any[]) {
   return (value: any) => {
     if (Array.isArray(value)) {
       const array: any[] = [];

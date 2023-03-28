@@ -5,7 +5,9 @@ export default class OrWherePipeline extends WherePipeline {
    * {@inheritDoc}
    */
   public parse() {
-    const data = [];
+    const data: {
+      [key: string]: any;
+    }[] = [];
 
     for (const column in this.pipelineData) {
       data.push({

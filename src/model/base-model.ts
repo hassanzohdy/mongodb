@@ -1,4 +1,3 @@
-import Resource from "core/resources/resource";
 import { Collection } from "mongodb";
 import database, { Database } from "../database";
 import masterMind from "./master-mind";
@@ -20,7 +19,7 @@ export default abstract class BaseModel {
   /**
    * Model associated resource
    */
-  public static resource?: typeof Resource;
+  public static resource?: any;
 
   /**
    * Missing key symbol
@@ -61,7 +60,7 @@ export default abstract class BaseModel {
     return await masterMind.generateNextId(
       this.collection,
       this.incrementIdBy,
-      this.initialId,
+      this.initialId
     );
   }
 

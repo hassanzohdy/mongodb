@@ -1,8 +1,9 @@
 import Is from "@mongez/supportive-is";
 import { Command } from "commander";
-import databaseConfigurations from "config/database";
-import { BluePrint, connectToDatabase } from "core/database";
-import { getBlueprintsList, setMigrationsList } from "core/database/migrate";
+import BluePrint from "../../blueprint";
+import { getDatabaseConfigurations } from "../../config";
+import { getBlueprintsList, setMigrationsList } from "../../migrate";
+import { connectToDatabase } from "../../utils";
 
 function parseBluePrint(data: any) {
   const schema: any = {};
@@ -31,10 +32,10 @@ export function registerBlueprintsCommand(migrationsList: any[]) {
     .description("List all blueprints")
     .action(() => {
       setMigrationsList(migrationsList);
-      connectToDatabase(databaseConfigurations);
+      connectToDatabase(getDatabaseConfigurations());
 
       console.log(
-        getBlueprintsList().map(blueprint => parseBluePrint(blueprint.schema)),
+        getBlueprintsList().map((blueprint) => parseBluePrint(blueprint.schema))
       );
     });
 }

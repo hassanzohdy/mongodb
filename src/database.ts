@@ -42,7 +42,7 @@ export class Database {
    */
   public async listCollectionNames() {
     return (await this.database.listCollections().toArray()).map(
-      collection => collection.name,
+      (collection) => collection.name
     );
   }
 

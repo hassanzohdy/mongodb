@@ -1,8 +1,9 @@
 import { capitalize } from "@mongez/reinforcements";
 import chalk from "chalk";
-import { BluePrint, onceConnected } from "core/database";
 import dayjs from "dayjs";
+import BluePrint from "./blueprint";
 import migrationOffice from "./model/migration-office";
+import { onceConnected } from "./utils";
 
 let currentMigrations: any[] = [];
 
@@ -15,7 +16,7 @@ export function setMigrationsList(migrations: any[]) {
 }
 
 export function getBlueprintsList() {
-  const blueprints: typeof BluePrint[] = [];
+  const blueprints: (typeof BluePrint)[] = [];
 
   for (const migration of currentMigrations) {
     if (!migration.blueprint || blueprints.includes(migration.blueprint))
@@ -32,7 +33,7 @@ export function listMigrations() {
     console.log(
       chalk.blue("→"),
       chalk.cyan("[migration]"),
-      chalk.yellow('"Listing all migrations"'),
+      chalk.yellow('"Listing all migrations"')
     );
 
     const migrations = await migrationOffice.list();
@@ -42,7 +43,7 @@ export function listMigrations() {
         // exclamation mark
         chalk.yellow("⚠"),
         chalk.cyan("[migration]"),
-        "No migrations found",
+        "No migrations found"
       );
     }
 
@@ -52,9 +53,9 @@ export function listMigrations() {
         chalk.green("✓"),
         chalk.cyan("[migration]"),
         chalk.magentaBright(
-          dayjs(migration.createdAt).format("YYYY-MM-DD HH:mm:ss"),
+          dayjs(migration.createdAt).format("YYYY-MM-DD HH:mm:ss")
         ),
-        chalk.greenBright(migration.name),
+        chalk.greenBright(migration.name)
       );
     }
 
@@ -67,7 +68,7 @@ export function getMigrationName(migration: any) {
 
   migrationName = migrationName.replace(
     new RegExp(`migrations|migration`, "i"),
-    "",
+    ""
   );
 
   // migration name can be something like usersGroupMigration
@@ -89,7 +90,7 @@ export async function dropMigrations() {
       chalk.cyan("[migration]"),
       chalk.gray("[dropping]"),
       chalk.red("Dropping"),
-      chalk.yellowBright(`${migrationName} migration`),
+      chalk.yellowBright(`${migrationName} migration`)
     );
     try {
       await migrationOffice.dropMigration(migrationName);
@@ -101,7 +102,7 @@ export async function dropMigrations() {
         chalk.cyan("[migration]"),
         chalk.gray("[dropped]"),
         chalk.redBright("Dropped"),
-        chalk.greenBright(`${migrationName} migration`),
+        chalk.greenBright(`${migrationName} migration`)
       );
     } catch (error: any) {
       console.log(
@@ -109,7 +110,7 @@ export async function dropMigrations() {
         chalk.cyan("[migration]"),
         chalk.gray("[dropFailed]"),
         chalk.redBright("Failed to drop"),
-        chalk.greenBright(`${migrationName} migration`),
+        chalk.greenBright(`${migrationName} migration`)
       );
 
       console.log(error.message);
@@ -130,7 +131,7 @@ export async function startMigrating(fresh = false) {
       chalk.blue("→"),
       chalk.cyan("[migration]"),
       chalk.gray("[migrating]"),
-      "Creating " + chalk.yellowBright(`${migrationName} migration`),
+      "Creating " + chalk.yellowBright(`${migrationName} migration`)
     );
 
     try {
@@ -143,8 +144,8 @@ export async function startMigrating(fresh = false) {
           chalk.cyan("[migration]"),
           chalk.gray("[skipped]"),
           `${chalk.redBright(
-            migrationName + " Migration",
-          )} has been done before.`,
+            migrationName + " Migration"
+          )} has been done before.`
         );
         continue;
       }
@@ -158,8 +159,8 @@ export async function startMigrating(fresh = false) {
         chalk.cyan("[migration]"),
         chalk.gray("[migrated]"),
         `${chalk.greenBright(
-          migrationName + " Migration",
-        )} has been migrated successfully.`,
+          migrationName + " Migration"
+        )} has been migrated successfully.`
       );
     } catch (error) {
       console.log(error);

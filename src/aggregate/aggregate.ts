@@ -1,7 +1,7 @@
 import { log } from "@mongez/logger";
-import { get } from "@mongez/reinforcements";
+import { GenericObject, get } from "@mongez/reinforcements";
 import { ObjectId } from "mongodb";
-import database from "../database";
+import database, { Database } from "../database";
 import { PaginationListing } from "../model";
 import queryBuilder from "../query-builder/query-builder";
 import DeselectPipeline from "./DeselectPipeline";
@@ -15,7 +15,7 @@ import SortByPipeline from "./SortByPipeline";
 import SortPipeline from "./SortPipeline";
 import SortRandomPipeline from "./SortRandomPipeline";
 import UnwindPipeline from "./UnwindPipeline";
-import { toOperator, where } from "./WhereExpression";
+import { where } from "./WhereExpression";
 import WhereExpressionPipeline from "./WhereExpressionPipeline";
 import WherePipeline from "./WherePipeline";
 import { addToSet, count, dayOfMonth, last, month, year } from "./expressions";
@@ -23,26 +23,16 @@ import { parsePipelines } from "./parsePipelines";
 import Pipeline from "./pipeline";
 import { WhereOperator } from "./types";
 
-export type GenericObject = {
-  [key: string]: any;
-};
-
-function size(operator: any, value: any) {
-  if (!operator) {
-    value = operator;
-    operator = "=";
-  }
-
-  return {
-    [toOperator(operator)]: value,
-  };
-}
-
 export default class Aggregate {
   /**
    * Collection pipelines
    */
   protected pipelines: Pipeline[] = [];
+
+  /**
+   * Database instance
+   */
+  protected database: Database = database;
 
   /**
    * Constructor
@@ -91,7 +81,7 @@ export default class Aggregate {
     if (!limit) {
       // get limit pipeline
       const limitPipeline = this.pipelines.find(
-        pipeline => pipeline.name === "limit",
+        (pipeline) => pipeline.name === "limit"
       );
 
       if (limitPipeline) {
@@ -100,7 +90,7 @@ export default class Aggregate {
 
       if (!limit) {
         throw new Error(
-          "You must provide a limit when using random() or use limit() pipeline",
+          "You must provide a limit when using random() or use limit() pipeline"
         );
       }
     }
@@ -115,7 +105,7 @@ export default class Aggregate {
   public groupBy(GroupByPipeline: GroupByPipeline): this;
   public groupBy(
     GroupByPipeline: GenericObject,
-    groupByData?: GenericObject,
+    groupByData?: GenericObject
   ): this;
   public groupBy(groupBy_id: string | null): this;
   public groupBy(groupBy_id: string | null, groupByData: GenericObject): this;
@@ -137,7 +127,7 @@ export default class Aggregate {
       {
         year: year(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -150,7 +140,7 @@ export default class Aggregate {
         year: year(column),
         month: month(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -162,7 +152,7 @@ export default class Aggregate {
       {
         month: month(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -176,7 +166,7 @@ export default class Aggregate {
         month: month(column),
         day: dayOfMonth(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -188,7 +178,7 @@ export default class Aggregate {
       {
         day: dayOfMonth(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -196,7 +186,7 @@ export default class Aggregate {
    * Pluck only the given column
    */
   public async pluck(column: string) {
-    return await this.select([column]).get(record => get(record, column));
+    return await this.select([column]).get((record) => get(record, column));
   }
 
   /**
@@ -205,7 +195,7 @@ export default class Aggregate {
   public async distinct(column: string) {
     return await this.groupBy(column, {
       [column]: addToSet(column),
-    }).get(record => record[column]);
+    }).get((record) => record[column]);
   }
 
   /**
@@ -323,7 +313,7 @@ export default class Aggregate {
   public async delete() {
     const ids = await (
       await this.select(["_id"]).pluck("_id")
-    ).map(_id => new ObjectId(_id));
+    ).map((_id) => new ObjectId(_id));
 
     return await queryBuilder.delete(this.collection, {
       _id: ids,
@@ -358,7 +348,7 @@ export default class Aggregate {
   public whereSize(
     column: string,
     operator: ">" | ">=" | "=" | "<" | "<=",
-    size: number,
+    size: number
   ): this;
   public whereSize(...args: any[]) {
     // first we need to project the column to get the size
@@ -420,7 +410,7 @@ export default class Aggregate {
     column: string,
     value: [number, number],
     minDistance: number,
-    maxDistance: number,
+    maxDistance: number
   ) {
     return this.where(column, value);
   }
@@ -501,7 +491,7 @@ export default class Aggregate {
    * Explain the query
    */
   public async explain() {
-    const collection = database.collection(this.collection);
+    const collection = this.database.collection(this.collection);
 
     return await collection.aggregate(this.parse(), {
       explain: true,
@@ -513,7 +503,7 @@ export default class Aggregate {
    */
   public async paginate<T = any>(
     page = 1,
-    limit = 15,
+    limit = 15
   ): Promise<PaginationListing<T>> {
     const totalDocumentsQuery = this.parse();
 
@@ -544,13 +534,13 @@ export default class Aggregate {
    */
   public async update(data: any) {
     try {
-      const collection = database.collection(this.collection);
+      const collection = this.database.collection(this.collection);
 
       const query: any[] = [];
 
       const filters = {};
 
-      this.parse().forEach(pipeline => {
+      this.parse().forEach((pipeline) => {
         if (pipeline.$match) {
           Object.assign(filters, pipeline.$match);
         } else {
@@ -578,13 +568,13 @@ export default class Aggregate {
    */
   public async unset(...columns: string[]) {
     try {
-      const collection = database.collection(this.collection);
+      const collection = this.database.collection(this.collection);
 
       const query: any[] = [];
 
       const filters = {};
 
-      this.parse().forEach(pipeline => {
+      this.parse().forEach((pipeline) => {
         if (pipeline.$match) {
           Object.assign(filters, pipeline.$match);
         } else {
@@ -611,7 +601,7 @@ export default class Aggregate {
    * Execute the query
    */
   public async execute() {
-    const collection = database.collection(this.collection);
+    const collection = this.database.collection(this.collection);
 
     const results = await collection.aggregate(this.parse()).toArray();
 

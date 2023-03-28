@@ -608,13 +608,6 @@
     "@jridgewell/resolve-uri" "3.1.0"
     "@jridgewell/sourcemap-codec" "1.4.14"
 
-"@mongez/config@^1.0.26":
-  version "1.0.26"
-  resolved "https://registry.yarnpkg.com/@mongez/config/-/config-1.0.26.tgz#719827766254e0229dac0db8e48213c0353f9ed4"
-  integrity sha512-LcHw0zibJukYPtYCzgAYtl0DOdks/xZfl6DbbAgzZt3c0iq9C/p42kiy2KaZgMmP3jqA3p5mhq+He/JXSCystw==
-  dependencies:
-    "@mongez/reinforcements" "^2.x.x"
-
 "@mongez/events@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@mongez/events/-/events-2.0.0.tgz#8d40edf1453cc113c67e4f7e892db8ab52b0c44e"
@@ -636,14 +629,7 @@
     chalk "^4"
     dayjs "^1.11.7"
 
-"@mongez/password@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@mongez/password/-/password-1.0.2.tgz#74516efc021f65371df6060affdcb320b9150f36"
-  integrity sha512-9IOjSPtQERiPS/rElz/Up4UMbmlB2p6YOURx9zQmrA7feKZEHjgbcFL+W7dGYLq42jQH6H44cPL/F4YGDeXOJA==
-  dependencies:
-    bcryptjs "^2.4.3"
-
-"@mongez/reinforcements@^2.3.0", "@mongez/reinforcements@^2.x.x":
+"@mongez/reinforcements@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@mongez/reinforcements/-/reinforcements-2.3.0.tgz#d98c17f0578736f87e601493ab0fc15a49b6570b"
   integrity sha512-nwdg5ToQgdLxqfezYcb+s969A0s7qul+EKWAkB7pHsaFkf77qmP7uG497oaqa6LxnnW4TiAhx17AMS/ixw3qIA==
@@ -1125,11 +1111,6 @@ balanced-match@^1.0.0:
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
-bcryptjs@^2.4.3:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/bcryptjs/-/bcryptjs-2.4.3.tgz#9ab5627b93e60621ff7cdac5da9733027df1d0cb"
-  integrity sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==
-
 big-integer@^1.6.17:
   version "1.6.51"
   resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
@@ -1328,6 +1309,14 @@ chainsaw@~0.1.0:
   dependencies:
     traverse ">=0.3.0 <0.4"
 
+chalk@4, chalk@^4, chalk@^4.0.0:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.2.tgz#aac4e2b7734a740867aeb16bf02aad556a1e7a01"
+  integrity sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==
+  dependencies:
+    ansi-styles "^4.1.0"
+    supports-color "^7.1.0"
+
 chalk@^2.0.0:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chalk/-/chalk-2.4.2.tgz#cd42541677a54333cf541a49108c1432b44c9424"
@@ -1336,14 +1325,6 @@ chalk@^2.0.0:
     ansi-styles "^3.2.1"
     escape-string-regexp "^1.0.5"
     supports-color "^5.3.0"
-
-chalk@^4, chalk@^4.0.0:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/chalk/-/chalk-4.1.2.tgz#aac4e2b7734a740867aeb16bf02aad556a1e7a01"
-  integrity sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==
-  dependencies:
-    ansi-styles "^4.1.0"
-    supports-color "^7.1.0"
 
 chalk@^5.0.1, chalk@^5.2.0:
   version "5.2.0"
@@ -1470,6 +1451,13 @@ console-control-strings@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/console-control-strings/-/console-control-strings-1.1.0.tgz#3d7cf4464db6446ea644bf4b39507f9851008e8e"
   integrity sha512-ty/fTekppD2fIwRvnZAVdeOiGd1c7YXEixbgJTNzqcxJWKQnjJ/V1bNEEE6hygpM3WjwHFUVK6HTjWSzV4a8sQ==
+
+console-table-printer@^2.11.1:
+  version "2.11.1"
+  resolved "https://registry.yarnpkg.com/console-table-printer/-/console-table-printer-2.11.1.tgz#c2dfe56e6343ea5bcfa3701a4be29fe912dbd9c7"
+  integrity sha512-8LfFpbF/BczoxPwo2oltto5bph8bJkGOATXsg3E9ddMJOGnWJciKHldx2zDj5XIBflaKzPfVCjOTl6tMh7lErg==
+  dependencies:
+    simple-wcswidth "^1.0.1"
 
 convert-source-map@^1.6.0, convert-source-map@^1.7.0:
   version "1.9.0"
@@ -3943,6 +3931,11 @@ sigstore@^1.0.0:
     "@sigstore/protobuf-specs" "^0.1.0"
     make-fetch-happen "^11.0.1"
     tuf-js "^1.0.0"
+
+simple-wcswidth@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/simple-wcswidth/-/simple-wcswidth-1.0.1.tgz#8ab18ac0ae342f9d9b629604e54d2aa1ecb018b2"
+  integrity sha512-xMO/8eNREtaROt7tJvWJqHBDTMFN4eiQ5I4JRMuilwfnFcV5W9u7RUkueNkdw0jPqGMX36iCywelS5yilTuOxg==
 
 sisteransi@^1.0.5:
   version "1.0.5"

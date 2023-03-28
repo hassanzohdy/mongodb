@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import { Table } from "console-table-printer";
-import database, { connection } from ".";
+import database from "../database";
+import { onceConnected } from "./onceConnected";
 
 export function listDatabaseIndexes() {
   onceConnected(async () => {
@@ -82,12 +83,4 @@ export function listDatabaseIndexes() {
 
     process.exit();
   });
-}
-
-export function onceConnected(callback: any) {
-  if (connection.isConnected()) {
-    callback();
-  } else {
-    connection.on("connected", callback);
-  }
 }

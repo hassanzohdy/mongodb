@@ -30,7 +30,7 @@ export default class ModelSync {
   public constructor(
     protected model: typeof Model,
     protected columns: string | string[],
-    protected embedMethod = "embedData",
+    protected embedMethod = "embedData"
   ) {
     //
   }

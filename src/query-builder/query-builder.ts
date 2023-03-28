@@ -1,18 +1,18 @@
 import { FindCursor, FindOptions } from "mongodb";
-import connection, { Connection } from "../connection";
+import database, { Database } from "../database";
 import { Document, Filter, ModelDocument } from "../model/types";
 
 export class QueryBuilder {
   /**
    * Connection instance
    */
-  protected connection: Connection = connection;
+  protected database: Database = database;
 
   /**
-   * Set the connection instance
+   * Set the database instance
    */
-  public setConnection(connection: Connection) {
-    this.connection = connection;
+  public setDatabase(database: Database) {
+    this.database = database;
 
     return this;
   }
@@ -21,7 +21,7 @@ export class QueryBuilder {
    * Get collection query for the given collection name
    */
   public query(collection: string) {
-    return this.connection.database.collection(collection);
+    return this.database.collection(collection);
   }
 
   /**
@@ -44,7 +44,7 @@ export class QueryBuilder {
   public async update(
     collection: string,
     filter: Filter,
-    data: Document,
+    data: Document
   ): Promise<Partial<ModelDocument> | null> {
     // get the query of the current collection
     const query = this.query(collection);
@@ -56,7 +56,7 @@ export class QueryBuilder {
       },
       {
         returnDocument: "after",
-      },
+      }
     );
 
     return result.ok ? result.value : null;
@@ -68,7 +68,7 @@ export class QueryBuilder {
   public async replace(
     collection: string,
     filter: Filter,
-    data: Document,
+    data: Document
   ): Promise<Partial<ModelDocument> | null> {
     const query = this.query(collection);
 
@@ -86,7 +86,7 @@ export class QueryBuilder {
   public async upsert(
     collection: string,
     filter: Filter,
-    data: Document,
+    data: Document
   ): Promise<Partial<ModelDocument> | null> {
     // get the query of the current collection
     const query = this.query(collection);
@@ -100,7 +100,7 @@ export class QueryBuilder {
       {
         returnDocument: "after",
         upsert: true,
-      },
+      }
     );
 
     return result.ok ? result.value : null;
@@ -122,7 +122,7 @@ export class QueryBuilder {
    */
   public async delete(
     collection: string,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<number> {
     const query = this.query(collection);
 
@@ -137,7 +137,7 @@ export class QueryBuilder {
   public async first<T = Document>(
     collection: string,
     filter: Filter = {},
-    findOptions?: FindOptions,
+    findOptions?: FindOptions
   ): Promise<T | null> {
     const query = this.query(collection);
 
@@ -168,7 +168,7 @@ export class QueryBuilder {
     collection: string,
     filter: Filter = {},
     queryHandler?: (query: FindCursor) => void,
-    findOptions?: FindOptions,
+    findOptions?: FindOptions
   ) {
     const query = this.query(collection);
 
@@ -201,7 +201,7 @@ export class QueryBuilder {
   public async distinct(
     collection: string,
     field: string,
-    filter: Filter = {},
+    filter: Filter = {}
   ) {
     const query = this.query(collection);
 

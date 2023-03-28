@@ -2,17 +2,9 @@ import events from "@mongez/events";
 import { log } from "@mongez/logger";
 import { MongoClient } from "mongodb";
 import database, { Database } from "./database";
+import { DatabaseConfigurations } from "./types";
 
 export type ConnectionEvent = "connected" | "error" | "close";
-
-export type DatabaseConfigurations = {
-  host: string;
-  port: number;
-  username: string;
-  password: string;
-  name: string;
-  dbAuth: string;
-};
 
 export class Connection {
   /**
@@ -55,8 +47,15 @@ export class Connection {
       };
     }
 
-    const { host, port, username, password, name, dbAuth } =
-      this.configurations;
+    const {
+      host,
+      port,
+      username,
+      password,
+      name,
+      dbAuth,
+      ...otherConnectionOptions
+    } = this.configurations;
 
     try {
       log.info("database", "connection", "Connecting to the database");
@@ -67,6 +66,7 @@ export class Connection {
         },
         // add database authentication here
         authSource: dbAuth,
+        ...otherConnectionOptions,
       });
 
       const mongoDBDatabase = await this.client.db(name);
@@ -86,7 +86,7 @@ export class Connection {
         log.warn(
           "database",
           "connection",
-          "Connected, but you are not making a secure authenticated connection!",
+          "Connected, but you are not making a secure authenticated connection!"
         );
       } else {
         log.success("database", "connection", "Connected to the database");

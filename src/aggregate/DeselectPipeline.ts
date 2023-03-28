@@ -12,7 +12,7 @@ export default class DeselectPipeline extends Pipeline {
         acc[column] = 0;
 
         return acc;
-      }, {}),
+      }, {})
     );
   }
 }

@@ -42,7 +42,7 @@ export class MigrationOffice {
       chalk.blue("→"),
       chalk.cyan("[migration]"),
       chalk.redBright("Dropping"),
-      "all migrations",
+      "all migrations"
     );
 
     await queryBuilder.delete(this.collection);
@@ -50,7 +50,7 @@ export class MigrationOffice {
     console.log(
       chalk.green("✓"),
       chalk.cyan("[migration]"),
-      "All migrations has been " + chalk.greenBright("dropped successfully."),
+      "All migrations has been " + chalk.greenBright("dropped successfully.")
     );
   }
 

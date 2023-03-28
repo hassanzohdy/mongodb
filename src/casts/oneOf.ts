@@ -1,4 +1,4 @@
-export default function oneOf(values: any[]) {
+export function oneOf(values: any[]) {
   return function castOneOf(value: any) {
     if (values.includes(value)) return value;
 

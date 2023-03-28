@@ -39,6 +39,11 @@ export default class Model extends RelationshipModel {
   public moveToTrash = true;
 
   /**
+   * Items per page
+   */
+  public perPage = 15;
+
+  /**
    * If set to true, then only the original data and the data in the casts property will be saved
    * If set to false, all data will be saved
    */
@@ -89,6 +94,11 @@ export default class Model extends RelationshipModel {
    * Deleted at column
    */
   public deletedAtColumn = "deletedAt";
+
+  /**
+   * Date format
+   */
+  public dateFormat = "DD-MM-YYYY";
 
   /**
    * Constructor
@@ -284,7 +294,7 @@ export default class Model extends RelationshipModel {
           {
             _id: this.data._id,
           },
-          this.data,
+          this.data
         );
 
         await selfModelEvents.trigger("updated", this);
@@ -386,7 +396,7 @@ export default class Model extends RelationshipModel {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
-            value.map(async item => await castValue(item)),
+            value.map(async (item) => await castValue(item))
           );
         }
       } else {
@@ -430,13 +440,12 @@ export default class Model extends RelationshipModel {
         if (isEmpty) return null;
 
         if (typeof value === "string") {
-          return dayjs(value, "DD-MM-YYYY").toDate();
+          return dayjs(value, this.dateFormat).toDate();
         }
 
         // timestamp
         if (typeof value === "number") {
-          // timestamp in seconds
-          return new Date(value * 1000);
+          return new Date(value);
         }
 
         return new Date();

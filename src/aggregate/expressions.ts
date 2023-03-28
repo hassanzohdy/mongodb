@@ -152,7 +152,6 @@ export function lastMonth(column: string) {
 /**
  * Get day of month expression
  */
-export const day = dayOfMonth;
 export function dayOfMonth(column: string) {
   return {
     $dayOfMonth: `$${column}`,
@@ -376,7 +375,7 @@ export function notBetween(minValue: any, maxValue: any) {
  */
 export function concat(...columns: string[]) {
   return {
-    $concat: columns.map(column => "$" + ltrim(column, "$")),
+    $concat: columns.map((column) => "$" + ltrim(column, "$")),
   };
 }
 
@@ -385,7 +384,7 @@ export function concat(...columns: string[]) {
  */
 export function concatWith(separator: string, ...columns: string[]) {
   return {
-    $concat: [separator, ...columns.map(column => "$" + ltrim(column, "$"))],
+    $concat: [separator, ...columns.map((column) => "$" + ltrim(column, "$"))],
   };
 }
 
@@ -419,3 +418,57 @@ export function all(values: any[]) {
     $all: values,
   };
 }
+
+export const $agg = {
+  // list all aggregation functions
+  count,
+  sum,
+  avg,
+  average,
+  min,
+  max,
+  first,
+  last,
+  push,
+  addToSet,
+  all,
+  year,
+  firstYear,
+  lastYear,
+  month,
+  firstMonth,
+  lastMonth,
+  firstDayOfMonth,
+  lastDayOfMonth,
+  dayOfMonth,
+  dayOfWeek,
+  columns,
+  gt,
+  greaterThan,
+  gte,
+  greaterThanOrEqual,
+  lt,
+  lessThan,
+  lte,
+  lessThanOrEqual,
+  eq,
+  equal,
+  ne,
+  notEqual,
+  inArray,
+  nin,
+  notIn,
+  notInArray,
+  exists,
+  notExists,
+  like,
+  notLike,
+  notNull,
+  isNull,
+  between,
+  notBetween,
+  concat,
+  concatWith,
+  cond,
+  regex,
+};
