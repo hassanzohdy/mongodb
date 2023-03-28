@@ -1,10 +1,10 @@
 import { Command } from "commander";
-import { getDatabaseConfigurations } from "../../config";
+import { getDatabaseConfigurations } from "../config";
 import {
   connectToDatabase,
   dropAllDatabaseIndexes,
-  listDatabaseIndexes
-} from "../../utils";
+  listDatabaseIndexes,
+} from "../utils";
 
 export function registerDatabaseIndexesCommand() {
   return new Command("db:indexes")

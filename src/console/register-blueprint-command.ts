@@ -1,9 +1,9 @@
 import Is from "@mongez/supportive-is";
 import { Command } from "commander";
-import BluePrint from "../../blueprint";
-import { getDatabaseConfigurations } from "../../config";
-import { getBlueprintsList, setMigrationsList } from "../../migrate";
-import { connectToDatabase } from "../../utils";
+import BluePrint from "./../blueprint";
+import { getDatabaseConfigurations } from "./../config";
+import { getBlueprintsList, setMigrationsList } from "./../migrate";
+import { connectToDatabase } from "./../utils";
 
 function parseBluePrint(data: any) {
   const schema: any = {};

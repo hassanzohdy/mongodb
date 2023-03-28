@@ -1,7 +1,7 @@
 import { Command } from "commander";
-import { getDatabaseConfigurations } from "../../config";
-import migrate, { listMigrations, setMigrationsList } from "../../migrate";
-import { connectToDatabase } from "../../utils";
+import { getDatabaseConfigurations } from "./../config";
+import migrate, { listMigrations, setMigrationsList } from "./../migrate";
+import { connectToDatabase } from "./../utils";
 
 export function registerMigrationCommand(migrationsList: any[]) {
   return new Command("migrate")
