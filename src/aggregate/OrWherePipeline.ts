@@ -1,4 +1,4 @@
-import WherePipeline from "./WherePipeline";
+import { WherePipeline } from "./WherePipeline";
 
 export class OrWherePipeline extends WherePipeline {
   /**

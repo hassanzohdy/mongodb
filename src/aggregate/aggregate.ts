@@ -4,20 +4,20 @@ import { ObjectId } from "mongodb";
 import database, { Database } from "../database";
 import { PaginationListing } from "../model";
 import queryBuilder from "../query-builder/query-builder";
-import DeselectPipeline from "./DeselectPipeline";
-import GroupByPipeline from "./GroupByPipeline";
-import LimitPipeline from "./LimitPipeline";
-import LookupPipeline, { LookupPipelineOptions } from "./LookupPipeline";
-import OrWherePipeline from "./OrWherePipeline";
-import SelectPipeline from "./SelectPipeline";
-import SkipPipeline from "./SkipPipeline";
-import SortByPipeline from "./SortByPipeline";
-import SortPipeline from "./SortPipeline";
-import SortRandomPipeline from "./SortRandomPipeline";
-import UnwindPipeline from "./UnwindPipeline";
-import { where } from "./WhereExpression";
-import WhereExpressionPipeline from "./WhereExpressionPipeline";
-import WherePipeline from "./WherePipeline";
+import { DeselectPipeline } from "./DeselectPipeline";
+import { GroupByPipeline } from "./GroupByPipeline";
+import { LimitPipeline } from "./LimitPipeline";
+import { LookupPipeline, LookupPipelineOptions } from "./LookupPipeline";
+import { OrWherePipeline } from "./OrWherePipeline";
+import { SelectPipeline } from "./SelectPipeline";
+import { SkipPipeline } from "./SkipPipeline";
+import { SortByPipeline } from "./SortByPipeline";
+import { SortPipeline } from "./SortPipeline";
+import { SortRandomPipeline } from "./SortRandomPipeline";
+import { UnwindPipeline } from "./UnwindPipeline";
+import { WhereExpression } from "./WhereExpression";
+import { WhereExpressionPipeline } from "./WhereExpressionPipeline";
+import { WherePipeline } from "./WherePipeline";
 import { addToSet, count, dayOfMonth, last, month, year } from "./expressions";
 import { parsePipelines } from "./parsePipelines";
 import { Pipeline } from "./pipeline";
@@ -248,7 +248,7 @@ export class Aggregate {
   public where(column: GenericObject): this;
   public where(...args: any[]) {
     // eslint-disable-next-line prefer-spread
-    return this.pipeline(new WherePipeline(where.apply(null, args as any)));
+    return this.pipeline(new WherePipeline(WhereExpression.parse("", args)));
   }
 
   /**

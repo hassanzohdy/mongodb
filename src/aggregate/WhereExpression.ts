@@ -93,8 +93,6 @@ export class WhereExpression {
   }
 }
 
-export const where = WhereExpression.parse;
-
 export const toOperator = (operator: WhereOperator) => {
   return WhereExpression.operators[operator];
 };
