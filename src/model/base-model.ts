@@ -75,7 +75,7 @@ export default abstract class BaseModel {
    * Get an instance of child class
    */
   protected static self(data: Document) {
-    return new (this.constructor as any)(data);
+    return new (this as any)(data);
   }
 
   /**
