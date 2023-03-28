@@ -558,3 +558,5 @@ export default class Model extends RelationshipModel {
     return this.embedded.length > 0 ? this.only(this.embedded) : this.data;
   }
 }
+
+export type ModelType = typeof Model;

@@ -1,6 +1,6 @@
 import { exit } from "process";
 import database from "../database";
-import { onceConnected } from "./listDatabaseIndexes";
+import { onceConnected } from "./../utils/onceConnected";
 
 export function dropAllDatabaseIndexes() {
   onceConnected(async () => {
