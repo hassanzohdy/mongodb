@@ -1,6 +1,6 @@
 import { toStudlyCase } from "@mongez/reinforcements";
+import { Aggregate } from "../aggregate";
 import { select } from "../aggregate/SelectPipeline";
-import Aggregate from "../aggregate/aggregate";
 import { PaginationListing } from "./types";
 
 export default class ModelAggregate<T> extends Aggregate {

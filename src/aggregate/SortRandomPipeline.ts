@@ -1,6 +1,6 @@
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class SortRandomPipeline extends Pipeline {
+export class SortRandomPipeline extends Pipeline {
   /**
    * Constructor
    */

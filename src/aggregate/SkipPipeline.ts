@@ -1,6 +1,6 @@
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class SkipPipeline extends Pipeline {
+export class SkipPipeline extends Pipeline {
   /**
    * Constructor
    */

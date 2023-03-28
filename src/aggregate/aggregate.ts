@@ -20,10 +20,10 @@ import WhereExpressionPipeline from "./WhereExpressionPipeline";
 import WherePipeline from "./WherePipeline";
 import { addToSet, count, dayOfMonth, last, month, year } from "./expressions";
 import { parsePipelines } from "./parsePipelines";
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 import { WhereOperator } from "./types";
 
-export default class Aggregate {
+export class Aggregate {
   /**
    * Collection pipelines
    */

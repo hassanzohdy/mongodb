@@ -1,7 +1,7 @@
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 import { GeoLocation } from "./types";
 
-export default class GeoNearPipeline extends Pipeline {
+export class GeoNearPipeline extends Pipeline {
   /**
    * Constructor
    */
@@ -9,7 +9,7 @@ export default class GeoNearPipeline extends Pipeline {
     protected readonly column: string,
     protected readonly location: GeoLocation,
     protected readonly maxDistance?: number,
-    protected readonly minDistance?: number,
+    protected readonly minDistance?: number
   ) {
     super("geoNear");
   }

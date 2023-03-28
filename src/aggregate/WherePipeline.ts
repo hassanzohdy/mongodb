@@ -1,7 +1,7 @@
 import { GenericObject } from "@mongez/reinforcements";
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class WherePipeline extends Pipeline {
+export class WherePipeline extends Pipeline {
   /**
    * Constructor
    */

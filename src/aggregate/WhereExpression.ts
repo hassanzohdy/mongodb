@@ -2,7 +2,7 @@ import Is from "@mongez/supportive-is";
 import { Filter } from "../model";
 import { MongoDBOperator, WhereOperator } from "./types";
 
-export default class WhereExpression {
+export class WhereExpression {
   /**
    * Operators list
    */

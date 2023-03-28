@@ -1,13 +1,13 @@
 import { ltrim } from "@mongez/reinforcements";
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class UnwindPipeline extends Pipeline {
+export class UnwindPipeline extends Pipeline {
   /**
    * Constructor
    */
   public constructor(
     protected readonly column: string,
-    protected readonly preserveNullAndEmptyArrays: boolean = false,
+    protected readonly preserveNullAndEmptyArrays: boolean = false
   ) {
     super("unwind");
 

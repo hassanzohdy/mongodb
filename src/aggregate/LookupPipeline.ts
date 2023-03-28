@@ -1,6 +1,6 @@
 import { GenericObject } from "@mongez/reinforcements";
 import { parsePipelines } from "./parsePipelines";
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
 export type LookupPipelineOptions = {
   from: string;
@@ -12,7 +12,7 @@ export type LookupPipelineOptions = {
   let?: GenericObject;
 };
 
-export default class LookupPipeline extends Pipeline {
+export class LookupPipeline extends Pipeline {
   /**
    * Constructor
    */

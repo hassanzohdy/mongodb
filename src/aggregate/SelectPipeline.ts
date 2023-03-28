@@ -1,11 +1,11 @@
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class SelectPipeline extends Pipeline {
+export class SelectPipeline extends Pipeline {
   /**
    * Constructor
    */
   public constructor(
-    protected readonly columns: string[] | Record<string, 0 | 1 | boolean>,
+    protected readonly columns: string[] | Record<string, 0 | 1 | boolean>
   ) {
     super("project");
     const selections: Record<string, 0 | 1> = {};
@@ -16,7 +16,7 @@ export default class SelectPipeline extends Pipeline {
           selections[column] = 1;
 
           return selections;
-        }, selections),
+        }, selections)
       );
     } else {
       for (const column in columns) {

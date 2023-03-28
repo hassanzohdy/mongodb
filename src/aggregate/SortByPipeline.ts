@@ -1,11 +1,11 @@
-import Pipeline from "./pipeline";
+import { Pipeline } from "./pipeline";
 
-export default class SortByPipeline extends Pipeline {
+export class SortByPipeline extends Pipeline {
   /**
    * Constructor
    */
   public constructor(
-    protected readonly columns: Record<string, "desc" | "asc">,
+    protected readonly columns: Record<string, "desc" | "asc">
   ) {
     super("sort");
 

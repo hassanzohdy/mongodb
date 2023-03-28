@@ -1,4 +1,4 @@
-export default class Pipeline {
+export class Pipeline {
   /**
    * Pipeline data
    */

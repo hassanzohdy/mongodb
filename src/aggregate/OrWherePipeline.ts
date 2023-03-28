@@ -1,6 +1,6 @@
 import WherePipeline from "./WherePipeline";
 
-export default class OrWherePipeline extends WherePipeline {
+export class OrWherePipeline extends WherePipeline {
   /**
    * {@inheritDoc}
    */
