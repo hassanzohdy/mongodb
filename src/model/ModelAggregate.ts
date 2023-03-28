@@ -9,7 +9,7 @@ export default class ModelAggregate<T> extends Aggregate {
    */
   public constructor(protected readonly model: any) {
     super(model.collection);
-    this.database = model.getStaticProperty("database");
+    this.database = model.database;
   }
 
   /**
