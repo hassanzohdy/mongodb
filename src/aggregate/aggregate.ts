@@ -247,8 +247,9 @@ export class Aggregate {
   public where(column: string, operator: WhereOperator, value: any): this;
   public where(column: GenericObject): this;
   public where(...args: any[]) {
-    // eslint-disable-next-line prefer-spread
-    return this.pipeline(new WherePipeline(WhereExpression.parse(args)));
+    return this.pipeline(
+      new WherePipeline(WhereExpression.parse.apply(null, args as any))
+    );
   }
 
   /**
