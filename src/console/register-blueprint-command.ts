@@ -1,7 +1,6 @@
 import Is from "@mongez/supportive-is";
 import { Command } from "commander";
 import BluePrint from "./../blueprint";
-import { getDatabaseConfigurations } from "./../config";
 import { getBlueprintsList, setMigrationsList } from "./../migrate";
 import { connectToDatabase } from "./../utils";
 
@@ -32,7 +31,7 @@ export function registerBlueprintsCommand(migrationsList: any[]) {
     .description("List all blueprints")
     .action(() => {
       setMigrationsList(migrationsList);
-      connectToDatabase(getDatabaseConfigurations());
+      connectToDatabase();
 
       console.log(
         getBlueprintsList().map((blueprint) => parseBluePrint(blueprint.schema))

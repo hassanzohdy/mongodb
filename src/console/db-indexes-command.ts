@@ -1,5 +1,4 @@
 import { Command } from "commander";
-import { getDatabaseConfigurations } from "../config";
 import {
   connectToDatabase,
   dropAllDatabaseIndexes,
@@ -11,7 +10,7 @@ export function registerDatabaseIndexesCommand() {
     .description("List all database indexes")
     .option("-d, --drop", "Drop all database indexes")
     .action((options) => {
-      connectToDatabase(getDatabaseConfigurations());
+      connectToDatabase();
       if (options.drop) {
         return dropAllDatabaseIndexes();
       }
