@@ -1,5 +1,5 @@
 import { Collection } from "mongodb";
-import database, { Database } from "../database";
+import { database, Database } from "../database";
 import masterMind from "./master-mind";
 import Model from "./model";
 import ModelEvents from "./model-events";

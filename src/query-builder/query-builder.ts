@@ -1,5 +1,5 @@
 import { FindCursor, FindOptions } from "mongodb";
-import database, { Database } from "../database";
+import { Database, database } from "../database";
 import { Document, Filter, ModelDocument } from "../model/types";
 
 export class QueryBuilder {

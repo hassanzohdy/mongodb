@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { Table } from "console-table-printer";
-import database from "../database";
+import { database } from "../database";
 import { onceConnected } from "./onceConnected";
 
 export function listDatabaseIndexes() {

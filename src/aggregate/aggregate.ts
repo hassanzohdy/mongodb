@@ -1,7 +1,7 @@
 import { log } from "@mongez/logger";
 import { GenericObject, get } from "@mongez/reinforcements";
 import { ObjectId } from "mongodb";
-import database, { Database } from "../database";
+import { Database, database } from "../database";
 import { PaginationListing } from "../model";
 import queryBuilder from "../query-builder/query-builder";
 import { DeselectPipeline } from "./DeselectPipeline";

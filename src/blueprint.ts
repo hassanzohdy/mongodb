@@ -1,9 +1,9 @@
 import { GenericObject } from "@mongez/reinforcements";
 import { CreateIndexesOptions, ObjectId } from "mongodb";
-import database from "./database";
+import { database } from "./database";
 import { Model } from "./model";
 
-export default class BluePrint {
+export class BluePrint {
   public static model: typeof Model;
 
   /**
@@ -208,4 +208,13 @@ export default class BluePrint {
       ...schema,
     };
   }
+}
+
+/**
+ * Get a blueprint class for the given model
+ */
+export function bluePrint(model: typeof Model) {
+  return class extends BluePrint {
+    public static model = model;
+  };
 }

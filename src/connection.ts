@@ -1,7 +1,7 @@
 import events from "@mongez/events";
 import { log } from "@mongez/logger";
 import { MongoClient } from "mongodb";
-import database, { Database } from "./database";
+import { database, Database } from "./database";
 import { DatabaseConfigurations } from "./types";
 
 export type ConnectionEvent = "connected" | "error" | "close";
@@ -122,6 +122,4 @@ export class Connection {
   }
 }
 
-const connection = new Connection();
-
-export default connection;
+export const connection = new Connection();
