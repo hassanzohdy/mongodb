@@ -10,6 +10,7 @@ export { Database } from "./database";
 export * from "./migrate";
 export { default as migrate } from "./migrate";
 export * from "./model";
+export * from "./models";
 export * from "./query-builder";
 export * from "./types";
 export * from "./utils";
