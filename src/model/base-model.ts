@@ -17,9 +17,9 @@ export default abstract class BaseModel {
   public static database: Database = database;
 
   /**
-   * Model associated resource
+   * Model associated output
    */
-  public static resource?: any;
+  public static output?: any;
 
   /**
    * Missing key symbol
@@ -110,13 +110,13 @@ export default abstract class BaseModel {
    * Prepare model for response
    */
   public async toJSON() {
-    // get static resource class
-    const resource = this.getStaticProperty("resource");
+    // get static output class
+    const Output = this.getStaticProperty("output");
 
-    // if the model has a resource class
-    if (resource) {
-      // then return the resource instance and call `toJSON` method
-      return await new resource(this).toJSON();
+    // if the model has a Output class
+    if (Output) {
+      // then return the Output instance and call `toJSON` method
+      return await new Output(this).toJSON();
     }
 
     // otherwise return the data object
@@ -124,19 +124,13 @@ export default abstract class BaseModel {
   }
 
   /**
-   * Get current resource instance
+   * Get current output instance
    */
-  public getResource(data?: Document) {
-    // get static resource class
-    const resource = this.getStaticProperty("resource");
+  public getOutput(data?: Document) {
+    // get static output class
+    const Output = this.getStaticProperty("output");
 
-    // if the model has a resource class
-    if (resource) {
-      // then return the resource instance and call `toJSON` method
-      return new resource(data || this);
-    }
-
-    return data;
+    return Output ? new Output(data) : data;
   }
 
   /**
