@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import migrate, { listMigrations, setMigrationsList } from "./../migrate";
+import { listMigrations, migrate, setMigrationsList } from "./../migrate";
 import { connectToDatabase } from "./../utils";
 
 export function registerMigrationCommand(migrationsList: any[]) {

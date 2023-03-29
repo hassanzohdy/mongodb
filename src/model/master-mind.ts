@@ -67,6 +67,4 @@ export class MasterMind {
   }
 }
 
-const masterMind = new MasterMind();
-
-export default masterMind;
+export const masterMind = new MasterMind();

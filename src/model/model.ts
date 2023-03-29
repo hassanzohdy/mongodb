@@ -9,9 +9,9 @@ import {
 import Is from "@mongez/supportive-is";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
-import queryBuilder from "../query-builder/query-builder";
-import ModelEvents from "./model-events";
-import RelationshipModel from "./relationships";
+import { queryBuilder } from "../query-builder/query-builder";
+import { ModelEvents } from "./model-events";
+import { RelationshipModel } from "./relationships";
 import {
   CastType,
   Casts,
@@ -20,7 +20,7 @@ import {
   ModelDocument,
 } from "./types";
 
-export default class Model extends RelationshipModel {
+export class Model extends RelationshipModel {
   /**
    * Model Initial Document data
    */

@@ -1,6 +1,6 @@
-import Model from "./model";
+import { Model } from "./model";
 
-export default class ModelEvents<T extends Model> {
+export class ModelEvents<T extends Model> {
   /**
    * Event callbacks
    */

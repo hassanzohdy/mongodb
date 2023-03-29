@@ -216,6 +216,4 @@ export class QueryBuilder {
   }
 }
 
-const queryBuilder = new QueryBuilder();
-
-export default queryBuilder;
+export const queryBuilder = new QueryBuilder();

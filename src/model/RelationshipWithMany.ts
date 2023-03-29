@@ -1,7 +1,7 @@
-import Model from "./model";
+import { Model } from "./model";
 import { Filter, ModelDocument } from "./types";
 
-export default class RelationshipWithMany<T> {
+export class RelationshipWithMany<T> {
   /**
    * Constructor
    */

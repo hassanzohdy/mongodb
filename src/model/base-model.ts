@@ -1,11 +1,12 @@
 import { Collection } from "mongodb";
+import { bluePrint } from "../blueprint";
 import { database, Database } from "../database";
-import masterMind from "./master-mind";
-import Model from "./model";
-import ModelEvents from "./model-events";
+import { masterMind } from "./master-mind";
+import { Model } from "./model";
+import { ModelEvents } from "./model-events";
 import { ChildModel, Document } from "./types";
 
-export default abstract class BaseModel {
+export abstract class BaseModel {
   /**
    * Collection Name
    */
@@ -102,7 +103,7 @@ export default abstract class BaseModel {
   /**
    * Get static property
    */
-  public getStaticProperty(property: keyof typeof Model) {
+  public getStaticProperty(property: keyof typeof BaseModel) {
     return (this.constructor as any)[property];
   }
 
@@ -142,5 +143,12 @@ export default abstract class BaseModel {
     }
 
     return this.modelEvents;
+  }
+
+  /**
+   * Get model blueprint
+   */
+  public static blueprint() {
+    return bluePrint(this as any);
   }
 }

@@ -1,13 +1,13 @@
 import { capitalize } from "@mongez/reinforcements";
 import chalk from "chalk";
 import dayjs from "dayjs";
-import BluePrint from "./blueprint";
-import migrationOffice from "./model/migration-office";
+import { BluePrint } from "./blueprint";
+import { migrationOffice } from "./model/migration-office";
 import { onceConnected } from "./utils";
 
 let currentMigrations: any[] = [];
 
-export default function migrate(fresh = false) {
+export function migrate(fresh = false) {
   onceConnected(() => startMigrating(fresh));
 }
 

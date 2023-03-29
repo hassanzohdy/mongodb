@@ -1,5 +1,5 @@
 import { ObjectId, WithId } from "mongodb";
-import Model from "./model";
+import { Model } from "./model";
 
 /**
  * Primary id type

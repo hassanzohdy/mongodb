@@ -3,7 +3,7 @@ import { Aggregate } from "../aggregate";
 import { select } from "../aggregate/SelectPipeline";
 import { PaginationListing } from "./types";
 
-export default class ModelAggregate<T> extends Aggregate {
+export class ModelAggregate<T> extends Aggregate {
   /**
    * Constructor
    */

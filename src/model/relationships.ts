@@ -1,12 +1,12 @@
 import { clone } from "@mongez/reinforcements";
-import ModelAggregate from "./ModelAggregate";
-import ModelSync from "./ModelSync";
-import RelationshipWithMany from "./RelationshipWithMany";
-import CrudModel from "./crud-model";
-import Model from "./model";
+import { ModelAggregate } from "./ModelAggregate";
+import { ModelSync } from "./ModelSync";
+import { RelationshipWithMany } from "./RelationshipWithMany";
+import { CrudModel } from "./crud-model";
+import { Model } from "./model";
 import { ChildModel, ModelDocument } from "./types";
 
-export default abstract class RelationshipModel extends CrudModel {
+export abstract class RelationshipModel extends CrudModel {
   /**
    * Sync with list
    */

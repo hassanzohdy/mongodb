@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
-import queryBuilder from "../query-builder/query-builder";
-import BaseModel from "./base-model";
+import { queryBuilder } from "../query-builder/query-builder";
+import { BaseModel } from "./base-model";
 import {
   ChildModel,
   Document,
@@ -10,7 +10,7 @@ import {
   PrimaryIdType,
 } from "./types";
 
-export default abstract class CrudModel extends BaseModel {
+export abstract class CrudModel extends BaseModel {
   /**
    * Create a new record in the database for the current model (child class of this one)
    * and return a new instance of it with the created data and the new generated id

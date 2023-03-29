@@ -1,6 +1,6 @@
 import chalk from "chalk";
 import { connection, Connection } from "../connection";
-import queryBuilder from "../query-builder/query-builder";
+import { queryBuilder } from "../query-builder/query-builder";
 
 export class MigrationOffice {
   /**
@@ -71,6 +71,4 @@ export class MigrationOffice {
   }
 }
 
-const migrationOffice = new MigrationOffice();
-
-export default migrationOffice;
+export const migrationOffice = new MigrationOffice();

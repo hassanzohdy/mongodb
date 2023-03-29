@@ -213,7 +213,7 @@ export class BluePrint {
 /**
  * Get a blueprint class for the given model
  */
-export function bluePrint(model: typeof Model) {
+export function bluePrint(model: typeof Model): BluePrint {
   return class extends BluePrint {
     public static model = model;
   };

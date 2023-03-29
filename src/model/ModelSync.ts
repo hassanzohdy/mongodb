@@ -1,9 +1,9 @@
-import Model from "./model";
-import ModelAggregate from "./ModelAggregate";
+import { Model } from "./model";
+import { ModelAggregate } from "./ModelAggregate";
 
 type OnDelete = "unset" | "remove";
 
-export default class ModelSync {
+export class ModelSync {
   /**
    * What do do when model is deleted
    */

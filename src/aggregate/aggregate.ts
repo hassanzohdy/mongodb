@@ -3,7 +3,7 @@ import { GenericObject, get } from "@mongez/reinforcements";
 import { ObjectId } from "mongodb";
 import { Database, database } from "../database";
 import { PaginationListing } from "../model";
-import queryBuilder from "../query-builder/query-builder";
+import { queryBuilder } from "../query-builder/query-builder";
 import { DeselectPipeline } from "./DeselectPipeline";
 import { GroupByPipeline } from "./GroupByPipeline";
 import { LimitPipeline } from "./LimitPipeline";

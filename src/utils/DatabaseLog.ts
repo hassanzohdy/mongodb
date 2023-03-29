@@ -1,7 +1,7 @@
 import { LogChannel, LogLevel } from "@mongez/logger";
 import { Log } from "../models";
 
-export default class DatabaseLog extends LogChannel {
+export class DatabaseLog extends LogChannel {
   /**
    * {@inheritdoc}
    */
