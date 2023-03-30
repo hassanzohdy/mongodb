@@ -16,6 +16,7 @@ import {
   CastType,
   Casts,
   CustomCastType,
+  CustomCasts,
   Document,
   ModelDocument,
 } from "./types";
@@ -64,6 +65,13 @@ export class Model extends RelationshipModel {
    * Model casts types
    */
   protected casts: Casts = {};
+
+  /**
+   * Set custom casts that will be used to cast the model's data are not related to the current value of the collection's column
+   *
+   * For example: `name` is not a column in the given data, but it will be concatenation of `firstName` and `lastName`
+   */
+  protected customCasts: CustomCasts = {};
 
   /**
    * Guarded fields
@@ -444,6 +452,12 @@ export class Model extends RelationshipModel {
       }
 
       this.set(column, value);
+    }
+
+    for (const column in this.customCasts) {
+      const castType = this.customCasts[column];
+
+      this.set(column, await castType(this, column));
     }
   }
 

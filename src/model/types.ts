@@ -78,6 +78,13 @@ export type CollectionDocument<T> = ModelDocument &
 
 export type CustomCastType = (column: string, value: any, model: Model) => any;
 
+/**
+ * Custom casts
+ */
+export type CustomCasts = {
+  [column: string]: (model: Model, column: string) => any | Promise<any>;
+};
+
 export type CastType =
   | "string"
   | "number"
