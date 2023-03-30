@@ -284,6 +284,8 @@ export class Model extends RelationshipModel {
 
         const ModelEvents = Model.events();
 
+        await this.onSaving();
+        await this.onUpdating();
         await selfModelEvents.trigger("updating", this);
         await selfModelEvents.trigger("saving", this, "update");
         await ModelEvents.trigger("updating", this);
@@ -301,6 +303,9 @@ export class Model extends RelationshipModel {
         await selfModelEvents.trigger("saved", this, "update");
         await ModelEvents.trigger("updated", this);
         await ModelEvents.trigger("saved", this, "update");
+
+        await this.onSaved();
+        await this.onUpdated();
       } else {
         // creating a new document in the database
         const generateNextId =
@@ -341,6 +346,8 @@ export class Model extends RelationshipModel {
 
         const ModelEvents = Model.events();
 
+        await this.onSaving();
+        await this.onCreating();
         await selfModelEvents.trigger("creating", this);
         await selfModelEvents.trigger("saving", this, "create");
         await ModelEvents.trigger("creating", this);
@@ -352,6 +359,9 @@ export class Model extends RelationshipModel {
         await selfModelEvents.trigger("saved", this, "create");
         await ModelEvents.trigger("created", this);
         await ModelEvents.trigger("saved", this, "create");
+
+        await this.onSaved();
+        await this.onCreated();
       }
 
       this.originalData = { ...this.data };
@@ -365,6 +375,36 @@ export class Model extends RelationshipModel {
       throw error;
     }
   }
+
+  /**
+   * Triggered before saving the model either by creating or updating
+   */
+  protected async onSaving() {}
+
+  /**
+   * Triggered after saving the model either by creating or updating
+   */
+  protected async onSaved() {}
+
+  /**
+   * Triggered before creating the model
+   */
+  protected async onCreating() {}
+
+  /**
+   * Triggered after creating the model
+   */
+  protected async onCreated() {}
+
+  /**
+   * Triggered before updating the model
+   */
+  protected async onUpdating() {}
+
+  /**
+   * Triggered after updating the model
+   */
+  protected async onUpdated() {}
 
   /**
    * Cast data before saving
