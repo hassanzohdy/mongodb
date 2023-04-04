@@ -611,6 +611,13 @@ export class Model extends RelationshipModel {
   public get embeddedData() {
     return this.embedded.length > 0 ? this.only(this.embedded) : this.data;
   }
+
+  /**
+   * Clone the model
+   */
+  public clone() {
+    return new (this.constructor as any)(this.data);
+  }
 }
 
 export type ModelType = typeof Model;
