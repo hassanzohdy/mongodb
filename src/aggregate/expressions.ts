@@ -375,7 +375,7 @@ export function notBetween(minValue: any, maxValue: any) {
  */
 export function concat(...columns: string[]) {
   return {
-    $concat: columns.map((column) => "$" + ltrim(column, "$")),
+    $concat: columns.map(column => "$" + ltrim(column, "$")),
   };
 }
 
@@ -384,7 +384,7 @@ export function concat(...columns: string[]) {
  */
 export function concatWith(separator: string, ...columns: string[]) {
   return {
-    $concat: [separator, ...columns.map((column) => "$" + ltrim(column, "$"))],
+    $concat: [separator, ...columns.map(column => "$" + ltrim(column, "$"))],
   };
 }
 

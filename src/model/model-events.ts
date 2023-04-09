@@ -1,6 +1,6 @@
-import { Model } from "./model";
+import { Filter } from "./types";
 
-export class ModelEvents<T extends Model> {
+export class ModelEvents {
   /**
    * Event callbacks
    */
@@ -13,21 +13,15 @@ export class ModelEvents<T extends Model> {
     updated: [],
     deleting: [],
     deleted: [],
+    fetching: [],
   };
-
-  /**
-   * {@inheritDoc}
-   */
-  public constructor(protected collectionName: string) {
-    //
-  }
 
   /**
    * Add callback when model is about to be created or updated
    *
    * Triggered before saving the model
    */
-  public onSaving(callback: (model: T, type: "create" | "update") => void) {
+  public onSaving(callback: (model: any, type: "create" | "update") => void) {
     this.callbacks.saving.push(callback);
     return this;
   }
@@ -37,7 +31,7 @@ export class ModelEvents<T extends Model> {
    *
    * Triggered after saving the model
    */
-  public onSaved(callback: (model: T, type: "create" | "update") => void) {
+  public onSaved(callback: (model: any, type: "create" | "update") => void) {
     this.callbacks.saved.push(callback);
 
     return this;
@@ -46,7 +40,7 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is about to be created
    */
-  public onCreating(callback: (model: T) => void) {
+  public onCreating(callback: (model: any) => void) {
     this.callbacks.creating.push(callback);
 
     return this;
@@ -55,7 +49,7 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is created
    */
-  public onCreated(callback: (model: T) => void) {
+  public onCreated(callback: (model: any) => void) {
     this.callbacks.created.push(callback);
 
     return this;
@@ -64,7 +58,7 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is about to be updated
    */
-  public onUpdating(callback: (model: T) => void) {
+  public onUpdating(callback: (model: any) => void) {
     this.callbacks.updating.push(callback);
 
     return this;
@@ -73,7 +67,7 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is updated
    */
-  public onUpdated(callback: (model: T) => void) {
+  public onUpdated(callback: (model: any) => void) {
     this.callbacks.updated.push(callback);
 
     return this;
@@ -82,7 +76,7 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is about to be deleted
    */
-  public onDeleting(callback: (model: T) => void) {
+  public onDeleting(callback: (model: any) => void) {
     this.callbacks.deleting.push(callback);
 
     return this;
@@ -91,8 +85,17 @@ export class ModelEvents<T extends Model> {
   /**
    * Add callback when model is deleted
    */
-  public onDeleted(callback: (model: T) => void) {
+  public onDeleted(callback: (model: any) => void) {
     this.callbacks.deleted.push(callback);
+
+    return this;
+  }
+
+  /**
+   * Add callback when model is about to be fetched
+   */
+  public onFetching(callback: (model: any, filterOptions: Filter) => void) {
+    this.callbacks.fetching.push(callback);
 
     return this;
   }
@@ -110,16 +113,5 @@ export class ModelEvents<T extends Model> {
     for (const callback of callbacks) {
       await callback(...args);
     }
-  }
-
-  /**
-   * Get event name
-   */
-  protected name(event: string) {
-    if (this.collectionName) {
-      return `model.${this.collectionName}.${event}`;
-    }
-
-    return `model.${event}`;
   }
 }

@@ -7,6 +7,7 @@ import {
   set,
 } from "@mongez/reinforcements";
 import Is from "@mongez/supportive-is";
+import { fromUTC, now, toUTC } from "@mongez/time-wizard";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 import { queryBuilder } from "../query-builder/query-builder";
@@ -115,6 +116,8 @@ export class Model extends RelationshipModel {
     //
     super();
 
+    this.originalData = this.castDates(this.originalData);
+
     if (this.originalData instanceof Model) {
       this.originalData = this.originalData.data;
     }
@@ -129,7 +132,36 @@ export class Model extends RelationshipModel {
 
     this.data = { ...this.originalData };
 
-    this.initialData = { ...this.data };
+    this.initialData = { ...this.originalData };
+  }
+
+  /**
+   * Cast dates
+   */
+  protected castDates(data: Partial<ModelDocument>) {
+    const dates = [
+      this.createdAtColumn,
+      this.updatedAtColumn,
+      this.deletedAtColumn,
+    ];
+
+    for (const column in this.casts) {
+      if (this.casts[column] === "date") {
+        dates.push(column);
+      }
+    }
+
+    const newData: Partial<ModelDocument> = { ...data };
+
+    dates.forEach(dateColumn => {
+      const date: Date | undefined = get(newData, dateColumn);
+
+      if (date) {
+        set(newData, dateColumn, fromUTC(date));
+      }
+    });
+
+    return newData;
   }
 
   /**
@@ -287,7 +319,7 @@ export class Model extends RelationshipModel {
 
         await this.castData();
 
-        const selfModelEvents: ModelEvents<any> =
+        const selfModelEvents: ModelEvents =
           this.getStaticProperty("events").call(this);
 
         const ModelEvents = Model.events();
@@ -304,7 +336,7 @@ export class Model extends RelationshipModel {
           {
             _id: this.data._id,
           },
-          this.data
+          this.data,
         );
 
         await selfModelEvents.trigger("updated", this);
@@ -349,7 +381,7 @@ export class Model extends RelationshipModel {
 
         await this.castData();
 
-        const selfModelEvents: ModelEvents<any> =
+        const selfModelEvents: ModelEvents =
           this.getStaticProperty("events").call(this);
 
         const ModelEvents = Model.events();
@@ -387,32 +419,44 @@ export class Model extends RelationshipModel {
   /**
    * Triggered before saving the model either by creating or updating
    */
-  protected async onSaving() {}
+  protected async onSaving() {
+    //
+  }
 
   /**
    * Triggered after saving the model either by creating or updating
    */
-  protected async onSaved() {}
+  protected async onSaved() {
+    //
+  }
 
   /**
    * Triggered before creating the model
    */
-  protected async onCreating() {}
+  protected async onCreating() {
+    //
+  }
 
   /**
    * Triggered after creating the model
    */
-  protected async onCreated() {}
+  protected async onCreated() {
+    //
+  }
 
   /**
    * Triggered before updating the model
    */
-  protected async onUpdating() {}
+  protected async onUpdating() {
+    //
+  }
 
   /**
    * Triggered after updating the model
    */
-  protected async onUpdated() {}
+  protected async onUpdated() {
+    //
+  }
 
   /**
    * Cast data before saving
@@ -444,7 +488,7 @@ export class Model extends RelationshipModel {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
-            value.map(async (item) => await castValue(item))
+            value.map(async item => await castValue(item)),
           );
         }
       } else {
@@ -488,21 +532,25 @@ export class Model extends RelationshipModel {
       }
       case "date": {
         if (value instanceof Date) {
-          return value;
+          return toUTC(value);
+        }
+
+        if (value instanceof dayjs.Dayjs) {
+          return toUTC(value.toDate());
         }
 
         if (isEmpty) return null;
 
         if (typeof value === "string") {
-          return dayjs(value, this.dateFormat).toDate();
+          return toUTC(dayjs(value, this.dateFormat).toDate());
         }
 
         // timestamp
         if (typeof value === "number") {
-          return new Date(value);
+          return toUTC(new Date(value));
         }
 
-        return new Date();
+        return now().utc();
       }
       case "location": {
         if (isEmpty) return null;
@@ -566,7 +614,7 @@ export class Model extends RelationshipModel {
       });
     }
 
-    const selfModelEvents: ModelEvents<any> =
+    const selfModelEvents: ModelEvents =
       this.getStaticProperty("events").call(this);
 
     const ModelEvents = Model.events();

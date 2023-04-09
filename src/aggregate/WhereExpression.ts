@@ -1,4 +1,5 @@
 import Is from "@mongez/supportive-is";
+import { toUTC } from "@mongez/time-wizard";
 import { Filter } from "../model";
 import { MongoDBOperator, WhereOperator } from "./types";
 
@@ -42,7 +43,7 @@ export class WhereExpression {
   public static parse(
     column: string,
     operator: WhereOperator,
-    value: any
+    value: any,
   ): Filter;
   public static parse(...args: any[]) {
     if (args.length === 1 && Is.plainObject(args[0])) return args[0];
@@ -71,6 +72,18 @@ export class WhereExpression {
     let expression = {
       [WhereExpression.operators[operator as WhereOperator]]: value,
     };
+
+    if (value instanceof Date) {
+      value = toUTC(value);
+    } else if (Array.isArray(value)) {
+      value = value.map(item => {
+        if (item instanceof Date) {
+          return toUTC(item);
+        }
+
+        return item;
+      });
+    }
 
     if (operator === "between") {
       expression = {

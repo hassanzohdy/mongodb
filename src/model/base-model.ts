@@ -45,7 +45,7 @@ export abstract class BaseModel {
   /**
    * Model Events
    */
-  protected static modelEvents?: ModelEvents<any>;
+  protected static modelEvents?: ModelEvents;
 
   /**
    * Get collection query
@@ -61,7 +61,7 @@ export abstract class BaseModel {
     return await masterMind.generateNextId(
       this.collection,
       this.incrementIdBy,
-      this.initialId
+      this.initialId,
     );
   }
 
@@ -139,7 +139,7 @@ export abstract class BaseModel {
    */
   public static events<T extends Model>(this: ChildModel<T>) {
     if (!this.modelEvents) {
-      this.modelEvents = new ModelEvents<T>(this.collection);
+      this.modelEvents = new ModelEvents();
     }
 
     return this.modelEvents;
