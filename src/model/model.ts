@@ -535,7 +535,7 @@ export class Model extends RelationshipModel {
           return toUTC(value);
         }
 
-        if (value instanceof dayjs.Dayjs) {
+        if (dayjs.isDayjs(value)) {
           return toUTC(value.toDate());
         }
 
