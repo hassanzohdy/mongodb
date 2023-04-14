@@ -2,7 +2,7 @@ import { log } from "@mongez/logger";
 import { GenericObject, get } from "@mongez/reinforcements";
 import { ObjectId } from "mongodb";
 import { Database, database } from "../database";
-import { PaginationListing } from "../model";
+import { Filter, PaginationListing } from "../model";
 import { ModelEvents } from "../model/model-events";
 import { queryBuilder } from "../query-builder/query-builder";
 import { DeselectPipeline } from "./DeselectPipeline";
@@ -99,7 +99,7 @@ export class Aggregate {
     if (!limit) {
       // get limit pipeline
       const limitPipeline = this.pipelines.find(
-        pipeline => pipeline.name === "limit",
+        (pipeline) => pipeline.name === "limit"
       );
 
       if (limitPipeline) {
@@ -108,7 +108,7 @@ export class Aggregate {
 
       if (!limit) {
         throw new Error(
-          "You must provide a limit when using random() or use limit() pipeline",
+          "You must provide a limit when using random() or use limit() pipeline"
         );
       }
     }
@@ -123,7 +123,7 @@ export class Aggregate {
   public groupBy(GroupByPipeline: GroupByPipeline): this;
   public groupBy(
     GroupByPipeline: GenericObject,
-    groupByData?: GenericObject,
+    groupByData?: GenericObject
   ): this;
   public groupBy(groupBy_id: string | null): this;
   public groupBy(groupBy_id: string | null, groupByData: GenericObject): this;
@@ -145,7 +145,7 @@ export class Aggregate {
       {
         year: year(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -158,7 +158,7 @@ export class Aggregate {
         year: year(column),
         month: month(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -170,7 +170,7 @@ export class Aggregate {
       {
         month: month(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -184,7 +184,7 @@ export class Aggregate {
         month: month(column),
         day: dayOfMonth(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -196,7 +196,7 @@ export class Aggregate {
       {
         day: dayOfMonth(column),
       },
-      groupByData,
+      groupByData
     );
   }
 
@@ -204,7 +204,7 @@ export class Aggregate {
    * Pluck only the given column
    */
   public async pluck(column: string) {
-    return await this.select([column]).get(record => get(record, column));
+    return await this.select([column]).get((record) => get(record, column));
   }
 
   /**
@@ -213,7 +213,7 @@ export class Aggregate {
   public async distinct(column: string) {
     return await this.groupBy(column, {
       [column]: addToSet(column),
-    }).get(record => record[column]);
+    }).get((record) => record[column]);
   }
 
   /**
@@ -266,7 +266,7 @@ export class Aggregate {
   public where(column: GenericObject): this;
   public where(...args: any[]) {
     return this.pipeline(
-      new WherePipeline(WhereExpression.parse.apply(null, args as any)),
+      new WherePipeline(WhereExpression.parse.apply(null, args as any))
     );
   }
 
@@ -332,7 +332,7 @@ export class Aggregate {
   public async delete() {
     const ids = await (
       await this.select(["_id"]).pluck("_id")
-    ).map(_id => new ObjectId(_id));
+    ).map((_id) => new ObjectId(_id));
 
     return await queryBuilder.delete(this.collection, {
       _id: ids,
@@ -367,7 +367,7 @@ export class Aggregate {
   public whereSize(
     column: string,
     operator: ">" | ">=" | "=" | "<" | "<=",
-    size: number,
+    size: number
   ): this;
   public whereSize(...args: any[]) {
     // first we need to project the column to get the size
@@ -429,7 +429,7 @@ export class Aggregate {
     column: string,
     value: [number, number],
     minDistance: number,
-    maxDistance: number,
+    maxDistance: number
   ) {
     return this.where(column, value);
   }
@@ -482,7 +482,11 @@ export class Aggregate {
   /**
    * Get only first result
    */
-  public async first(): Promise<any> {
+  public async first(filters?: Filter): Promise<any> {
+    if (filters) {
+      this.where(filters);
+    }
+
     const results = await this.limit(1).get();
 
     return results[0];
@@ -491,7 +495,11 @@ export class Aggregate {
   /**
    * Get last result
    */
-  public async last(): Promise<any> {
+  public async last(filters?: Filter): Promise<any> {
+    if (filters) {
+      this.where(filters);
+    }
+
     const results = await this.orderByDesc("id").limit(1).get();
 
     return results[0];
@@ -522,7 +530,7 @@ export class Aggregate {
    */
   public async paginate<T = any>(
     page = 1,
-    limit = 15,
+    limit = 15
   ): Promise<PaginationListing<T>> {
     const totalDocumentsQuery = this.parse();
 
@@ -559,7 +567,7 @@ export class Aggregate {
 
       const filters = {};
 
-      this.parse().forEach(pipeline => {
+      this.parse().forEach((pipeline) => {
         if (pipeline.$match) {
           Object.assign(filters, pipeline.$match);
         } else {
@@ -593,7 +601,7 @@ export class Aggregate {
 
       const filters = {};
 
-      this.parse().forEach(pipeline => {
+      this.parse().forEach((pipeline) => {
         if (pipeline.$match) {
           Object.assign(filters, pipeline.$match);
         } else {

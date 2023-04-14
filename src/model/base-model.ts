@@ -61,7 +61,7 @@ export abstract class BaseModel {
     return await masterMind.generateNextId(
       this.collection,
       this.incrementIdBy,
-      this.initialId,
+      this.initialId
     );
   }
 

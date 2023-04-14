@@ -17,7 +17,7 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async create<T>(
     this: ChildModel<T>,
-    data: Document,
+    data: Document
   ): Promise<T> {
     const model = this.self(data); // get new instance of model
 
@@ -49,7 +49,7 @@ export abstract class CrudModel extends BaseModel {
   public static async update<T>(
     this: ChildModel<T>,
     id: PrimaryIdType,
-    data: Document,
+    data: Document
   ): Promise<T | null> {
     const model = (await this.find(id)) as any;
     // execute the update operation
@@ -67,7 +67,7 @@ export abstract class CrudModel extends BaseModel {
   public static async replace<T>(
     this: ChildModel<T>,
     id: PrimaryIdType,
-    data: Document,
+    data: Document
   ): Promise<T | null> {
     const model = (await this.find(id)) as any;
 
@@ -85,14 +85,14 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async restore<T>(
     this: ChildModel<T>,
-    id: PrimaryIdType,
+    id: PrimaryIdType
   ): Promise<T | null> {
     // retrieve the document from trash collection
     const result = await queryBuilder.first(
       this.collection + "Trash",
       this.prepareFilters({
         [this.primaryIdColumn]: id,
-      }),
+      })
     );
 
     if (!result) return null;
@@ -118,7 +118,7 @@ export abstract class CrudModel extends BaseModel {
   public static async upsert<T>(
     this: ChildModel<T>,
     filter: Filter,
-    data: Document,
+    data: Document
   ): Promise<T> {
     filter = this.prepareFilters(filter);
 
@@ -148,13 +148,13 @@ export abstract class CrudModel extends BaseModel {
   public static async findBy<T>(
     this: ChildModel<T>,
     column: string,
-    value: any,
+    value: any
   ): Promise<T | null> {
     const result = await queryBuilder.first(
       this.collection,
       this.prepareFilters({
         [column]: value,
-      }),
+      })
     );
 
     return result ? this.self(result as ModelDocument) : null;
@@ -165,14 +165,14 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async list<T>(
     this: ChildModel<T>,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<T[]> {
     const documents = await queryBuilder.list(
       this.collection,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
 
-    return documents.map(document => this.self(document));
+    return documents.map((document) => this.self(document));
   }
 
   /**
@@ -182,25 +182,25 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     filter: Filter,
     page = 1,
-    limit = 15,
+    limit = 15
   ): Promise<PaginationListing<T>> {
     filter = this.prepareFilters(filter);
 
     const documents = await queryBuilder.list(
       this.collection,
       filter,
-      query => {
+      (query) => {
         query.skip((page - 1) * limit).limit(limit);
-      },
+      }
     );
 
     const totalDocumentsOfFilter = await queryBuilder.count(
       this.collection,
-      filter,
+      filter
     );
 
     const result: PaginationListing<T> = {
-      documents: documents.map(document => this.self(document)),
+      documents: documents.map((document) => this.self(document)),
       paginationInfo: {
         limit,
         page,
@@ -219,7 +219,7 @@ export abstract class CrudModel extends BaseModel {
   public static async count(filter: Filter = {}) {
     return await queryBuilder.count(
       this.collection,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
   }
 
@@ -228,11 +228,11 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async first<T>(
     this: ChildModel<T>,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<T | null> {
     const result = await queryBuilder.first(
       this.collection,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
 
     return result ? this.self(result) : null;
@@ -243,11 +243,11 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async last<T>(
     this: ChildModel<T>,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<T | null> {
     const result = await queryBuilder.last(
       this.collection,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
 
     return result ? this.self(result) : null;
@@ -258,14 +258,14 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async latest<T>(
     this: ChildModel<T>,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<T[]> {
     const documents = await queryBuilder.latest(
       this.collection,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
 
-    return documents.map(document => this.self(document));
+    return documents.map((document) => this.self(document));
   }
 
   /**
@@ -274,7 +274,7 @@ export abstract class CrudModel extends BaseModel {
    */
   public static async delete<T>(
     this: ChildModel<T>,
-    filter: PrimaryIdType | Filter = {},
+    filter: PrimaryIdType | Filter = {}
   ): Promise<number> {
     if (
       filter instanceof ObjectId ||
@@ -285,7 +285,7 @@ export abstract class CrudModel extends BaseModel {
         this.collection,
         this.prepareFilters({
           [this.primaryIdColumn]: filter,
-        }),
+        })
       ))
         ? 1
         : 0;
@@ -300,12 +300,12 @@ export abstract class CrudModel extends BaseModel {
   public static async distinct<T>(
     this: ChildModel<T>,
     column: string,
-    filter: Filter = {},
+    filter: Filter = {}
   ): Promise<any[]> {
     return await queryBuilder.distinct(
       this.collection,
       column,
-      this.prepareFilters(filter),
+      this.prepareFilters(filter)
     );
   }
 

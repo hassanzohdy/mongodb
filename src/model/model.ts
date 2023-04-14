@@ -22,7 +22,9 @@ import {
   ModelDocument,
 } from "./types";
 
-export class Model extends RelationshipModel {
+export class Model<
+  Schema extends ModelDocument = ModelDocument
+> extends RelationshipModel {
   /**
    * Model Initial Document data
    */
@@ -110,6 +112,11 @@ export class Model extends RelationshipModel {
   public dateFormat = "DD-MM-YYYY";
 
   /**
+   * Current request object
+   */
+  public request?: any;
+
+  /**
    * Constructor
    */
   public constructor(public originalData: Partial<ModelDocument> = {}) {
@@ -136,6 +143,22 @@ export class Model extends RelationshipModel {
   }
 
   /**
+   * Set the current request object
+   */
+  public setRequest(request: any) {
+    this.request = request;
+
+    return this;
+  }
+
+  /**
+   * Get save columns which are the casts keys
+   */
+  public get castColumns() {
+    return Object.keys(this.casts);
+  }
+
+  /**
    * Cast dates
    */
   protected castDates(data: Partial<ModelDocument>) {
@@ -153,7 +176,7 @@ export class Model extends RelationshipModel {
 
     const newData: Partial<ModelDocument> = { ...data };
 
-    dates.forEach(dateColumn => {
+    dates.forEach((dateColumn) => {
       const date: Date | undefined = get(newData, dateColumn);
 
       if (date) {
@@ -209,8 +232,8 @@ export class Model extends RelationshipModel {
   /**
    * Set a column in the model data
    */
-  public set(column: string, value: any) {
-    this.data = set(this.data, column, value);
+  public set(column: keyof Schema, value: any) {
+    this.data = set(this.data, column as string, value);
 
     return this;
   }
@@ -218,50 +241,50 @@ export class Model extends RelationshipModel {
   /**
    * Increment the given column by the given value
    */
-  public increment(column: string, value = 1) {
-    return this.set(column, this.get(column, 0) + value);
+  public increment(column: keyof Schema, value = 1) {
+    return this.set(column, this.get(column as string, 0) + value);
   }
 
   /**
    * Decrement the given column by the given value
    */
-  public decrement(column: string, value = 1) {
-    return this.set(column, this.get(column, 0) - value);
+  public decrement(column: keyof Schema, value = 1) {
+    return this.set(column, this.get(column as string, 0) - value);
   }
 
   /**
    * Get value of the given column
    */
-  public get(column: string, defaultValue: any = undefined) {
-    return get(this.data, column, defaultValue);
+  public get(column: keyof Schema, defaultValue?: any) {
+    return get(this.data, column as string, defaultValue);
   }
 
   /**
    * Determine whether the given column exists in the document
    */
-  public has(column: string) {
-    return get(this.data, column, null) !== null;
+  public has(column: keyof Schema) {
+    return get(this.data, column as string) !== undefined;
   }
 
   /**
    * Get all columns except the given ones
    */
-  public except(columns: string[]): Document {
-    return except(this.data, columns);
+  public except(columns: (keyof Schema)[]): Document {
+    return except(this.data, columns as string[]);
   }
 
   /**
    * Get only the given columns
    */
-  public only(columns: string[]): Document {
-    return only(this.data, columns);
+  public only(columns: (keyof Schema)[]): Document {
+    return only(this.data, columns as string[]);
   }
 
   /**
    * Unset or remove the given columns from the data
    */
-  public unset(...columns: string[]) {
-    this.data = except(this.data, columns);
+  public unset(...columns: (keyof Schema)[]) {
+    this.data = except(this.data, columns as string[]);
 
     return this;
   }
@@ -269,7 +292,7 @@ export class Model extends RelationshipModel {
   /**
    * Replace the entire document data with the given new data
    */
-  public replaceWith(data: Document) {
+  public replaceWith(data: Schema) {
     if (!data.id && this.data.id) {
       data.id = this.data.id;
     }
@@ -295,9 +318,11 @@ export class Model extends RelationshipModel {
   /**
    * Perform saving operation either by updating or creating a new record in database
    */
-  public async save(mergedData: Document = {}) {
+  public async save(mergedData?: Omit<Schema, "id" | "_id">) {
     try {
-      this.merge(mergedData);
+      if (mergedData) {
+        this.merge(mergedData);
+      }
 
       let mode: "create" | "update" = "create";
 
@@ -336,16 +361,16 @@ export class Model extends RelationshipModel {
           {
             _id: this.data._id,
           },
-          this.data,
+          this.data
         );
 
-        await selfModelEvents.trigger("updated", this);
-        await selfModelEvents.trigger("saved", this, "update");
-        await ModelEvents.trigger("updated", this);
-        await ModelEvents.trigger("saved", this, "update");
+        selfModelEvents.trigger("updated", this);
+        selfModelEvents.trigger("saved", this, "update");
+        ModelEvents.trigger("updated", this);
+        ModelEvents.trigger("saved", this, "update");
 
-        await this.onSaved();
-        await this.onUpdated();
+        this.onSaved();
+        this.onUpdated();
       } else {
         // creating a new document in the database
         const generateNextId =
@@ -395,13 +420,13 @@ export class Model extends RelationshipModel {
 
         this.data = await queryBuilder.create(this.getCollection(), this.data);
 
-        await selfModelEvents.trigger("created", this);
-        await selfModelEvents.trigger("saved", this, "create");
-        await ModelEvents.trigger("created", this);
-        await ModelEvents.trigger("saved", this, "create");
+        selfModelEvents.trigger("created", this);
+        selfModelEvents.trigger("saved", this, "create");
+        ModelEvents.trigger("created", this);
+        ModelEvents.trigger("saved", this, "create");
 
-        await this.onSaved();
-        await this.onCreated();
+        this.onSaved();
+        this.onCreated();
       }
 
       this.originalData = { ...this.data };
@@ -488,7 +513,7 @@ export class Model extends RelationshipModel {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
-            value.map(async item => await castValue(item)),
+            value.map(async (item) => await castValue(item))
           );
         }
       } else {

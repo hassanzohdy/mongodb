@@ -1,7 +1,7 @@
 import { toStudlyCase } from "@mongez/reinforcements";
 import { Aggregate } from "../aggregate";
 import { select } from "../aggregate/SelectPipeline";
-import { PaginationListing } from "./types";
+import { Filter, PaginationListing } from "./types";
 
 export class ModelAggregate<T> extends Aggregate {
   /**
@@ -24,15 +24,15 @@ export class ModelAggregate<T> extends Aggregate {
   /**
    * {@inheritDoc}
    */
-  public async first() {
-    return (await super.first()) as T | null;
+  public async first(filters?: Filter) {
+    return (await super.first(filters)) as T | undefined;
   }
 
   /**
    * {@inheritDoc}
    */
-  public async last() {
-    return (await super.last()) as T | null;
+  public async last(filters?: Filter) {
+    return (await super.last(filters)) as T | undefined;
   }
 
   /**
