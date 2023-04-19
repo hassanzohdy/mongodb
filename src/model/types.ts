@@ -87,6 +87,7 @@ export type CustomCasts = {
 
 export type CastType =
   | "string"
+  | "localized"
   | "number"
   | "int"
   | "float"

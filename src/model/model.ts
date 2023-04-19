@@ -509,7 +509,7 @@ export class Model<
         return value;
       };
 
-      if (Array.isArray(value)) {
+      if (Array.isArray(value) && castType !== "localized") {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
@@ -538,6 +538,17 @@ export class Model<
     switch (castType) {
       case "string":
         return isEmpty ? "" : String(value).trim();
+      case "localized":
+        if (isEmpty) return [];
+
+        if (!Array.isArray(value)) return [];
+
+        return value.map((item) => {
+          return {
+            localeCode: item.localeCode,
+            value: item.value,
+          };
+        });
       case "number":
         return isEmpty ? 0 : Number(value);
       case "int":
