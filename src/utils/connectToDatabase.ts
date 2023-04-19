@@ -5,5 +5,5 @@ import { DatabaseConfigurations } from "../types";
 export function connectToDatabase(
   databaseConfigurations: DatabaseConfigurations = getDatabaseConfigurations()
 ) {
-  connection.connect(databaseConfigurations);
+  return connection.connect(databaseConfigurations);
 }
