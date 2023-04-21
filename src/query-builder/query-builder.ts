@@ -35,7 +35,7 @@ export class QueryBuilder {
     return {
       ...data,
       _id: result.insertedId,
-    };
+    } as ModelDocument;
   }
 
   /**

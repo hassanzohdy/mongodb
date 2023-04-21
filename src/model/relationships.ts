@@ -39,9 +39,9 @@ export abstract class RelationshipModel extends CrudModel {
   /**
    * Sync data on saving
    */
-  public startSyncing(saveMode: "create" | "update") {
+  public startSyncing(saveMode: "create" | "update", oldModel?: Model) {
     for (const modelSync of this.syncWith) {
-      modelSync.sync(this as any, saveMode);
+      modelSync.sync(this as any, saveMode, oldModel);
     }
   }
 
@@ -161,5 +161,19 @@ export abstract class RelationshipModel extends CrudModel {
     this.set(column, documentsList);
 
     return this;
+  }
+
+  /**
+   * Make a wrapper to list when models should be updated when only one of the given columns is updated
+   */
+  public syncUpdateWhenChange(
+    columns: string | string[],
+    syncModels: ModelSync[]
+  ) {
+    return syncModels.map((syncModel) => {
+      syncModel.updateWhenChange(columns);
+
+      return syncModel;
+    });
   }
 }

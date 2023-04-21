@@ -1,5 +1,6 @@
-import { Model } from "./model";
+import { areEqual } from "@mongez/reinforcements";
 import { ModelAggregate } from "./ModelAggregate";
+import { Model } from "./model";
 
 type OnDelete = "unset" | "remove";
 
@@ -25,6 +26,11 @@ export class ModelSync {
   protected queryRunner?: (query: ModelAggregate<Model>) => void;
 
   /**
+   * Define when should the synced model starts to update when any of the given columns is updated in the original model
+   */
+  protected _updateWhenChange?: string[];
+
+  /**
    * Constructor
    */
   public constructor(
@@ -33,6 +39,15 @@ export class ModelSync {
     protected embedMethod = "embedData"
   ) {
     //
+  }
+
+  /**
+   * Define when should the synced model starts to update when any of the given columns is updated in the original model
+   */
+  public updateWhenChange(columns: string | string[]) {
+    this._updateWhenChange = Array.isArray(columns) ? columns : [columns];
+
+    return this;
   }
 
   /**
@@ -80,9 +95,13 @@ export class ModelSync {
     return this;
   }
 
-  public async sync(model: Model, saveMode: "create" | "update") {
+  public async sync(
+    model: Model,
+    saveMode: "create" | "update",
+    oldModel?: Model
+  ) {
     if (saveMode === "update") {
-      return this.syncUpdate(model);
+      return this.syncUpdate(model, oldModel);
     }
 
     if (!this.embedOnCreate) return;
@@ -114,7 +133,19 @@ export class ModelSync {
   /**
    * Sync update
    */
-  public async syncUpdate(model: Model) {
+  public async syncUpdate(model: Model, oldModel?: Model) {
+    if (this._updateWhenChange && oldModel) {
+      // now check if any of the columns has changed
+      // if all of them are the same, then we don't need to update
+      if (
+        this._updateWhenChange.every((column) =>
+          areEqual(model.get(column), oldModel.get(column))
+        )
+      ) {
+        return;
+      }
+    }
+
     const columns = Array.isArray(this.columns) ? this.columns : [this.columns];
 
     const whereOptions: any = {};

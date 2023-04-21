@@ -23,17 +23,17 @@ import {
 } from "./types";
 
 export class Model<
-  Schema extends ModelDocument = ModelDocument
+  Schema extends ModelDocument = any
 > extends RelationshipModel {
   /**
    * Model Initial Document data
    */
-  public initialData: Partial<ModelDocument> = {};
+  public initialData: Partial<Schema> = {};
 
   /**
    * Model Document data
    */
-  public data: Partial<ModelDocument> = {};
+  public data!: Schema;
 
   /**
    * Determine whether to move document to trash or not before deleting it permanently
@@ -57,7 +57,7 @@ export class Model<
    * Define Default value data that will be merged with the models' data
    * on the create process
    */
-  public defaultValue: Document = {};
+  public defaultValue: Partial<Schema> = {};
 
   /**
    * A flag to determine if the model is being restored
@@ -92,6 +92,16 @@ export class Model<
   public embedded: string[] = [];
 
   /**
+   * Embed all columns except the given columns
+   */
+  public embedAllExcept: string[] = [];
+
+  /**
+   * Embed all columns except timestamps and created|updated|deleted by columns
+   */
+  public embedAllExceptTimestampsAndUserColumns = false;
+
+  /**
    * Created at column
    */
   public createdAtColumn = "createdAt";
@@ -107,6 +117,21 @@ export class Model<
   public deletedAtColumn = "deletedAt";
 
   /**
+   * Created by column
+   */
+  public createdByColumn = "createdBy";
+
+  /**
+   * Updated by column
+   */
+  public updatedByColumn = "updatedBy";
+
+  /**
+   * Deleted by column
+   */
+  public deletedByColumn = "deletedBy";
+
+  /**
    * Date format
    */
   public dateFormat = "DD-MM-YYYY";
@@ -119,7 +144,7 @@ export class Model<
   /**
    * Constructor
    */
-  public constructor(public originalData: Partial<ModelDocument> = {}) {
+  public constructor(public originalData: Schema = {} as Schema) {
     //
     super();
 
@@ -161,7 +186,7 @@ export class Model<
   /**
    * Cast dates
    */
-  protected castDates(data: Partial<ModelDocument>) {
+  protected castDates(data: Schema) {
     const dates = [
       this.createdAtColumn,
       this.updatedAtColumn,
@@ -174,7 +199,7 @@ export class Model<
       }
     }
 
-    const newData: Partial<ModelDocument> = { ...data };
+    const newData: Partial<Schema> = { ...data };
 
     dates.forEach((dateColumn) => {
       const date: Date | undefined = get(newData, dateColumn);
@@ -184,7 +209,7 @@ export class Model<
       }
     });
 
-    return newData;
+    return newData as Schema;
   }
 
   /**
@@ -233,7 +258,7 @@ export class Model<
    * Set a column in the model data
    */
   public set(column: keyof Schema, value: any) {
-    this.data = set(this.data, column as string, value);
+    this.data = set(this.data, column as string, value) as Schema;
 
     return this;
   }
@@ -242,14 +267,14 @@ export class Model<
    * Increment the given column by the given value
    */
   public increment(column: keyof Schema, value = 1) {
-    return this.set(column, this.get(column as string, 0) + value);
+    return this.set(column, this.get(column, 0) + value);
   }
 
   /**
    * Decrement the given column by the given value
    */
   public decrement(column: keyof Schema, value = 1) {
-    return this.set(column, this.get(column as string, 0) - value);
+    return this.set(column, this.get(column, 0) - value);
   }
 
   /**
@@ -326,6 +351,8 @@ export class Model<
 
       let mode: "create" | "update" = "create";
 
+      let currentModel;
+
       // check if the data contains the primary id column
       if (!this.isNewModel()) {
         // perform an update operation
@@ -334,12 +361,15 @@ export class Model<
 
         // if (areEqual(this.originalData, this.data)) return this;
 
+        currentModel = this.clone();
+
         mode = "update";
 
         const updatedAtColumn = this.updatedAtColumn;
 
         if (updatedAtColumn) {
-          this.data[updatedAtColumn] = new Date();
+          // updateAtColumn is supposed to be part of the Schema
+          (this.data as any)[updatedAtColumn] = new Date();
         }
 
         await this.castData();
@@ -392,7 +422,7 @@ export class Model<
 
         // if the column does not exist, then create it
         if (createdAtValue) {
-          this.data[createdAtColumn] = createdAtValue;
+          this.data[createdAtColumn as keyof Schema] = createdAtValue;
         }
 
         // if the column does not exist, then create it
@@ -401,7 +431,7 @@ export class Model<
         const updatedAtValue = this.get(updatedAtColumn, now);
 
         if (updatedAtValue) {
-          this.data[updatedAtColumn] = updatedAtValue;
+          this.data[updatedAtColumn as keyof Schema] = updatedAtValue;
         }
 
         await this.castData();
@@ -418,7 +448,10 @@ export class Model<
         await ModelEvents.trigger("creating", this);
         await ModelEvents.trigger("saving", this, "create");
 
-        this.data = await queryBuilder.create(this.getCollection(), this.data);
+        this.data = (await queryBuilder.create(
+          this.getCollection(),
+          this.data
+        )) as Schema;
 
         selfModelEvents.trigger("created", this);
         selfModelEvents.trigger("saved", this, "create");
@@ -431,7 +464,7 @@ export class Model<
 
       this.originalData = { ...this.data };
 
-      this.startSyncing(mode);
+      this.startSyncing(mode, currentModel);
 
       return this;
     } catch (error) {
@@ -641,7 +674,7 @@ export class Model<
     if (!this.data._id) return;
 
     if (this.deletedAtColumn) {
-      this.data[this.deletedAtColumn] = new Date();
+      (this.data as any)[this.deletedAtColumn] = new Date();
     }
 
     if (this.moveToTrash) {
@@ -693,6 +726,21 @@ export class Model<
    * Get embedded data
    */
   public get embeddedData() {
+    if (this.embedAllExcept.length > 0) {
+      return except(this.data, this.embedAllExcept);
+    }
+
+    if (this.embedAllExceptTimestampsAndUserColumns) {
+      return except(this.data, [
+        this.createdAtColumn,
+        this.updatedAtColumn,
+        this.deletedAtColumn,
+        this.createdByColumn,
+        this.updatedByColumn,
+        this.deletedByColumn,
+      ]);
+    }
+
     return this.embedded.length > 0 ? this.only(this.embedded) : this.data;
   }
 
