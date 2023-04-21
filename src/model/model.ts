@@ -22,9 +22,9 @@ import {
   ModelDocument,
 } from "./types";
 
-export class Model<
-  Schema extends ModelDocument = any
-> extends RelationshipModel {
+type Schema = ModelDocument;
+
+export class Model extends RelationshipModel {
   /**
    * Model Initial Document data
    */

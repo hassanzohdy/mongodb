@@ -108,11 +108,11 @@ export class ModelSync {
 
     const columns = Array.isArray(this.columns) ? this.columns : [this.columns];
 
-    const parentModel: Model = await (this.model as any).first({
+    const syncedModel: Model = await (this.model as any).first({
       id: model.get(this.embedOnCreate + ".id"),
     });
 
-    if (!parentModel) return;
+    if (!syncedModel) return;
 
     const modelData =
       typeof (model as any)[this.embedMethod] !== "undefined"
@@ -121,13 +121,13 @@ export class ModelSync {
 
     for (const column of columns) {
       if (this.syncMode === "single") {
-        parentModel.set(column, modelData);
+        syncedModel.set(column, modelData);
       } else {
-        parentModel.associate(column, modelData);
+        syncedModel.associate(column, modelData);
       }
     }
 
-    await parentModel.save();
+    await syncedModel.save();
   }
 
   /**
