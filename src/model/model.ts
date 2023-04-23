@@ -359,7 +359,8 @@ export class Model extends RelationshipModel {
         // check if the data has changed
         // if not changed, then do not do anything
 
-        // if (areEqual(this.originalData, this.data)) return this;
+        if (this.shouldUpdate(this.originalData, this.data) === false)
+          return this;
 
         currentModel = this.clone();
 
@@ -472,6 +473,13 @@ export class Model extends RelationshipModel {
       console.log(error);
       throw error;
     }
+  }
+
+  /**
+   * Determine whether the model should be updated or not
+   */
+  protected shouldUpdate(originalData: Schema, data: Schema) {
+    return areEqual(originalData, data) === false;
   }
 
   /**
@@ -748,7 +756,7 @@ export class Model extends RelationshipModel {
    * Clone the model
    */
   public clone() {
-    return new (this.constructor as any)(this.data);
+    return new (this.constructor as any)({ ...this.data });
   }
 }
 

@@ -1,19 +1,19 @@
 {
     "name": "@mongez/mongodb",
-    "version": "1.0.26",
+    "version": "1.0.27",
     "description": "Powerful Mongodb Database Manager for Node Js",
     "main": "src/index.ts",
     "dependencies": {
         "@mongez/events": "^2.0.0",
         "@mongez/logger": "^1.0.6",
-        "@mongez/reinforcements": "^2.3.0",
+        "@mongez/reinforcements": "^2.3.1",
         "@mongez/supportive-is": "^1.0.12",
         "@mongez/time-wizard": "^1.0.0",
         "dayjs": "^1.11.7",
-        "mongodb": "^5.2.0"
+        "mongodb": "^5.3.0"
     },
     "scripts": {
-        "update": "ncu -u",
+        "update": "npx ncu -u -x chalk",
         "fix:test": "eslint --fix -c ./.eslintrc.json ./tests",
         "format:test": "prettier --write ./tests/**/*.{js,jsx,ts,tsx,css,md,json} --config ./.prettierrc.json",
         "fix": "eslint --fix -c ./.eslintrc.json ./src",
@@ -25,16 +25,16 @@
         "url": "https://github.com/hassanzohdy/mongodb"
     },
     "devDependencies": {
-        "@types/jest": "^29.5.0",
+        "@types/jest": "^29.5.1",
         "chalk": "4",
-        "commander": "^10.0.0",
+        "commander": "^10.0.1",
         "console-table-printer": "^2.11.1",
-        "eslint": "^8.38.0",
+        "eslint": "^8.39.0",
         "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-unused-imports": "^2.0.0",
         "jest": "^29.5.0",
-        "npm-check-updates": "^16.10.8",
+        "npm-check-updates": "^16.10.9",
         "prettier": "^2.8.7",
         "prettier-plugin-organize-imports": "^3.2.2",
         "ts-jest": "^29.1.0",
