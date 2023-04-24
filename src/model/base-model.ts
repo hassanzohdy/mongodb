@@ -45,7 +45,7 @@ export abstract class BaseModel {
   /**
    * Model Events
    */
-  protected static modelEvents?: ModelEvents;
+  protected static modelEvents = new WeakMap<typeof BaseModel, ModelEvents>();
 
   /**
    * Get collection query
@@ -138,11 +138,14 @@ export abstract class BaseModel {
    * Get model events instance
    */
   public static events<T extends Model>(this: ChildModel<T>) {
-    if (!this.modelEvents) {
-      this.modelEvents = new ModelEvents();
+    let eventsInstance = this.modelEvents.get(this);
+
+    if (!eventsInstance) {
+      eventsInstance = new ModelEvents();
+      this.modelEvents.set(this, eventsInstance);
     }
 
-    return this.modelEvents;
+    return eventsInstance;
   }
 
   /**

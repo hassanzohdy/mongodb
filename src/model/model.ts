@@ -144,15 +144,15 @@ export class Model extends RelationshipModel {
   /**
    * Constructor
    */
-  public constructor(public originalData: Schema = {} as Schema) {
+  public constructor(public originalData: Schema | Model = {} as Schema) {
     //
     super();
 
-    this.originalData = this.castDates(this.originalData);
-
     if (this.originalData instanceof Model) {
-      this.originalData = this.originalData.data;
+      this.originalData = { ...this.originalData.data };
     }
+
+    this.originalData = this.castDates(this.originalData);
 
     if (typeof this.originalData._id === "string") {
       try {
@@ -203,6 +203,8 @@ export class Model extends RelationshipModel {
 
     dates.forEach((dateColumn) => {
       const date: Date | undefined = get(newData, dateColumn);
+
+      console.log(date, fromUTC(date!));
 
       if (date) {
         set(newData, dateColumn, fromUTC(date));
