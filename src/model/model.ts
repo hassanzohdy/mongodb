@@ -659,6 +659,8 @@ export class Model extends RelationshipModel {
 
         return value;
       }
+      case "mixed":
+      case "any":
       default:
         return value;
     }

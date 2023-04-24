@@ -98,6 +98,8 @@ export type CastType =
   | "date"
   | "location"
   | "boolean"
+  | "any"
+  | "mixed"
   | CustomCastType
   | Model;
 
