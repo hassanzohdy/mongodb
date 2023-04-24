@@ -204,8 +204,6 @@ export class Model extends RelationshipModel {
     dates.forEach((dateColumn) => {
       const date: Date | undefined = get(newData, dateColumn);
 
-      console.log(date, fromUTC(date!));
-
       if (date) {
         set(newData, dateColumn, fromUTC(date));
       }
