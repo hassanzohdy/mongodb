@@ -138,6 +138,10 @@ export abstract class BaseModel {
    * Get model events instance
    */
   public static events<T extends Model>(this: ChildModel<T>) {
+    if (! this.modelEvents) {
+      this.modelEvents = new WeakMap<typeof BaseModel, ModelEvents>();
+    }
+
     let eventsInstance = this.modelEvents.get(this);
 
     if (!eventsInstance) {
