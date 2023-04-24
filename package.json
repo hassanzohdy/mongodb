@@ -1,6 +1,6 @@
 {
     "name": "@mongez/mongodb",
-    "version": "1.0.33",
+    "version": "1.0.34",
     "description": "Powerful Mongodb Database Manager for Node Js",
     "main": "src/index.ts",
     "dependencies": {
@@ -8,7 +8,7 @@
         "@mongez/logger": "^1.0.6",
         "@mongez/reinforcements": "^2.3.1",
         "@mongez/supportive-is": "^1.0.12",
-        "@mongez/time-wizard": "^1.0.4",
+        "@mongez/time-wizard": "^1.0.5",
         "commander": "^10.0.1",
         "console-table-printer": "^2.11.1",
         "dayjs": "^1.11.7",
