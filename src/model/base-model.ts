@@ -5,6 +5,7 @@ import { masterMind } from "./master-mind";
 import { Model } from "./model";
 import { ModelEvents } from "./model-events";
 import { ChildModel, Document } from "./types";
+import { Random } from "@mongez/reinforcements";
 
 const modelEvents = new Map<string, ModelEvents>();
 
@@ -43,12 +44,12 @@ export abstract class BaseModel {
   /**
    * Define the initial value of the id
    */
-  public static initialId = 1;
+  public static initialId?: number;
 
   /**
    * Define the amount to eb incremented by for the next generated id
    */
-  public static incrementIdBy = 1;
+  public static incrementIdBy?: number;
 
   /**
    * Primary id column
@@ -60,6 +61,26 @@ export abstract class BaseModel {
    */
   public static query() {
     return this.database.collection(this.collection);
+  }
+
+  /**
+   * Get increment id by
+   */
+  public static getIncrementIdBy() {
+    if (this.incrementIdBy) return this.incrementIdBy;
+
+    // return Random number
+    return Random.number(100, 10000);
+  }
+
+  /**
+   * Get initial id
+   */
+  public static getInitialId() {
+    if (this.initialId) return this.initialId;
+
+    // return Random number
+    return Random.number(1000, 499999);
   }
 
   /**
