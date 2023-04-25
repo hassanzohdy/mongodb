@@ -6,6 +6,19 @@ import { Model } from "./model";
 import { ModelEvents } from "./model-events";
 import { ChildModel, Document } from "./types";
 
+const modelEvents = new Map<string, ModelEvents>();
+
+const getModelEvent = (collection: string) => {
+  let eventsInstance = modelEvents.get(collection);
+
+  if (!eventsInstance) {
+    eventsInstance = new ModelEvents(collection);
+    modelEvents.set(collection, eventsInstance);
+  }
+
+  return eventsInstance;
+};
+
 export abstract class BaseModel {
   /**
    * Collection Name
@@ -43,11 +56,6 @@ export abstract class BaseModel {
   public static primaryIdColumn = "id";
 
   /**
-   * Model Events
-   */
-  protected static modelEvents = new WeakMap<typeof BaseModel, ModelEvents>();
-
-  /**
    * Get collection query
    */
   public static query() {
@@ -61,7 +69,7 @@ export abstract class BaseModel {
     return await masterMind.generateNextId(
       this.collection,
       this.incrementIdBy,
-      this.initialId
+      this.initialId,
     );
   }
 
@@ -138,18 +146,21 @@ export abstract class BaseModel {
    * Get model events instance
    */
   public static events<T extends Model>(this: ChildModel<T>) {
-    if (! this.modelEvents) {
-      this.modelEvents = new WeakMap<typeof BaseModel, ModelEvents>();
-    }
+    return getModelEvent(this.collection);
+  }
 
-    let eventsInstance = this.modelEvents.get(this);
+  /**
+   * Get model events for current model
+   */
+  public getModelEvents() {
+    return getModelEvent(this.getCollection()) as ModelEvents;
+  }
 
-    if (!eventsInstance) {
-      eventsInstance = new ModelEvents();
-      this.modelEvents.set(this, eventsInstance);
-    }
-
-    return eventsInstance;
+  /**
+   * Get base model events
+   */
+  public getBaseModelEvents() {
+    return getModelEvent("__baseModel__");
   }
 
   /**

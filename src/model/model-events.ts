@@ -17,6 +17,13 @@ export class ModelEvents {
   };
 
   /**
+   * {@inheritdoc}
+   */
+  public constructor(public collection?: string) {
+    //
+  }
+
+  /**
    * Add callback when model is about to be created or updated
    *
    * Triggered before saving the model

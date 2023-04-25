@@ -11,7 +11,6 @@ import { fromUTC, now, toUTC } from "@mongez/time-wizard";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
 import { queryBuilder } from "../query-builder/query-builder";
-import { ModelEvents } from "./model-events";
 import { RelationshipModel } from "./relationships";
 import {
   CastType,
@@ -201,7 +200,7 @@ export class Model extends RelationshipModel {
 
     const newData: Partial<Schema> = { ...data };
 
-    dates.forEach((dateColumn) => {
+    dates.forEach(dateColumn => {
       const date: Date | undefined = get(newData, dateColumn);
 
       if (date) {
@@ -343,7 +342,16 @@ export class Model extends RelationshipModel {
   /**
    * Perform saving operation either by updating or creating a new record in database
    */
-  public async save(mergedData?: Omit<Schema, "id" | "_id">) {
+  public async save(
+    mergedData?: Omit<Schema, "id" | "_id">,
+    {
+      triggerEvents,
+    }: {
+      triggerEvents?: boolean;
+    } = {
+      triggerEvents: true,
+    },
+  ) {
     try {
       if (mergedData) {
         this.merge(mergedData);
@@ -375,33 +383,37 @@ export class Model extends RelationshipModel {
 
         await this.castData();
 
-        const selfModelEvents: ModelEvents =
-          this.getStaticProperty("events").call(this);
+        if (triggerEvents) {
+          const selfModelEvents = this.getModelEvents();
 
-        const ModelEvents = Model.events();
+          const ModelEvents = this.getBaseModelEvents();
 
-        await this.onSaving();
-        await this.onUpdating();
-        await selfModelEvents.trigger("updating", this);
-        await selfModelEvents.trigger("saving", this, "update");
-        await ModelEvents.trigger("updating", this);
-        await ModelEvents.trigger("saving", this, "update");
+          await this.onSaving();
+          await this.onUpdating();
+          await selfModelEvents.trigger("updating", this);
+          await selfModelEvents.trigger("saving", this, currentModel);
+          await ModelEvents.trigger("updating", this);
+          await ModelEvents.trigger("saving", this, currentModel);
+        }
 
         await queryBuilder.replace(
           this.getCollection(),
           {
             _id: this.data._id,
           },
-          this.data
+          this.data,
         );
 
-        selfModelEvents.trigger("updated", this);
-        selfModelEvents.trigger("saved", this, "update");
-        ModelEvents.trigger("updated", this);
-        ModelEvents.trigger("saved", this, "update");
-
-        this.onSaved();
-        this.onUpdated();
+        if (triggerEvents) {
+          const selfModelEvents = this.getModelEvents();
+          const ModelEvents = this.getBaseModelEvents();
+          this.onSaved();
+          this.onUpdated();
+          selfModelEvents.trigger("updated", this, currentModel);
+          selfModelEvents.trigger("saved", this, currentModel);
+          ModelEvents.trigger("updated", this), currentModel;
+          ModelEvents.trigger("saved", this, currentModel);
+        }
       } else {
         // creating a new document in the database
         const generateNextId =
@@ -437,30 +449,34 @@ export class Model extends RelationshipModel {
 
         await this.castData();
 
-        const selfModelEvents: ModelEvents =
-          this.getStaticProperty("events").call(this);
+        if (triggerEvents) {
+          const selfModelEvents = this.getModelEvents();
 
-        const ModelEvents = Model.events();
+          const ModelEvents = this.getBaseModelEvents();
 
-        await this.onSaving();
-        await this.onCreating();
-        await selfModelEvents.trigger("creating", this);
-        await selfModelEvents.trigger("saving", this, "create");
-        await ModelEvents.trigger("creating", this);
-        await ModelEvents.trigger("saving", this, "create");
+          await this.onSaving();
+          await this.onCreating();
+          await selfModelEvents.trigger("creating", this);
+          await selfModelEvents.trigger("saving", this);
+          await ModelEvents.trigger("creating", this);
+          await ModelEvents.trigger("saving", this);
+        }
 
         this.data = (await queryBuilder.create(
           this.getCollection(),
-          this.data
+          this.data,
         )) as Schema;
 
-        selfModelEvents.trigger("created", this);
-        selfModelEvents.trigger("saved", this, "create");
-        ModelEvents.trigger("created", this);
-        ModelEvents.trigger("saved", this, "create");
-
-        this.onSaved();
-        this.onCreated();
+        if (triggerEvents) {
+          const selfModelEvents = this.getModelEvents();
+          const ModelEvents = this.getBaseModelEvents();
+          this.onSaved();
+          this.onCreated();
+          selfModelEvents.trigger("created", this);
+          selfModelEvents.trigger("saved", this);
+          ModelEvents.trigger("created", this);
+          ModelEvents.trigger("saved", this);
+        }
       }
 
       this.originalData = { ...this.data };
@@ -473,6 +489,15 @@ export class Model extends RelationshipModel {
       console.log(error);
       throw error;
     }
+  }
+
+  /**
+   * Perform saving but without any events triggers
+   */
+  public async silentSaving(mergedData?: Omit<Schema, "id" | "_id">) {
+    return await this.save(mergedData, {
+      triggerEvents: false,
+    });
   }
 
   /**
@@ -554,7 +579,7 @@ export class Model extends RelationshipModel {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
-            value.map(async (item) => await castValue(item))
+            value.map(async item => await castValue(item)),
           );
         }
       } else {
@@ -584,7 +609,7 @@ export class Model extends RelationshipModel {
 
         if (!Array.isArray(value)) return [];
 
-        return value.map((item) => {
+        return value.map(item => {
           return {
             localeCode: item.localeCode,
             value: item.value,
@@ -627,7 +652,7 @@ export class Model extends RelationshipModel {
           return toUTC(new Date(value));
         }
 
-        return now().utc();
+        return now();
       }
       case "location": {
         if (isEmpty) return null;
@@ -693,10 +718,9 @@ export class Model extends RelationshipModel {
       });
     }
 
-    const selfModelEvents: ModelEvents =
-      this.getStaticProperty("events").call(this);
+    const selfModelEvents = this.getModelEvents();
 
-    const ModelEvents = Model.events();
+    const ModelEvents = this.getBaseModelEvents();
 
     await selfModelEvents.trigger("deleting", this);
     await ModelEvents.trigger("deleting", this);
