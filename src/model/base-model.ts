@@ -70,7 +70,7 @@ export abstract class BaseModel {
     if (this.incrementIdBy) return this.incrementIdBy;
 
     // return Random number
-    return Random.number(1000, 10000);
+    return Random.int(1000, 10000);
   }
 
   /**
@@ -80,7 +80,7 @@ export abstract class BaseModel {
     if (this.initialId) return this.initialId;
 
     // return Random number
-    return Random.number(10000, 499999);
+    return Random.int(10000, 499999);
   }
 
   /**
