@@ -28,7 +28,7 @@ export class ModelEvents {
    *
    * Triggered before saving the model
    */
-  public onSaving(callback: (model: any, type: "create" | "update") => void) {
+  public onSaving(callback: (model: any, oldModel?: any) => void) {
     this.callbacks.saving.push(callback);
     return this;
   }
@@ -38,7 +38,7 @@ export class ModelEvents {
    *
    * Triggered after saving the model
    */
-  public onSaved(callback: (model: any, type: "create" | "update") => void) {
+  public onSaved(callback: (model: any, oldModel?: any) => void) {
     this.callbacks.saved.push(callback);
 
     return this;
@@ -65,7 +65,7 @@ export class ModelEvents {
   /**
    * Add callback when model is about to be updated
    */
-  public onUpdating(callback: (model: any) => void) {
+  public onUpdating(callback: (model: any, oldModel: any) => void) {
     this.callbacks.updating.push(callback);
 
     return this;
@@ -74,7 +74,7 @@ export class ModelEvents {
   /**
    * Add callback when model is updated
    */
-  public onUpdated(callback: (model: any) => void) {
+  public onUpdated(callback: (model: any, oldModel: any) => void) {
     this.callbacks.updated.push(callback);
 
     return this;

@@ -167,7 +167,7 @@ export abstract class BaseModel {
    * Get model events instance
    */
   public static events<T extends Model>(this: ChildModel<T>) {
-    return getModelEvent(this.collection);
+    return getModelEvent(this.collection ?? "__baseModel__");
   }
 
   /**
