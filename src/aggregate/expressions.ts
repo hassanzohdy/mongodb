@@ -246,9 +246,9 @@ export function lte(value: any) {
  * Get equal expression
  */
 export const equal = eq;
-export function eq(value: any) {
+export function eq(...values: any) {
   return {
-    $eq: value,
+    $eq: values,
   };
 }
 
@@ -402,6 +402,19 @@ export function cond(condition: any, ifTrue: any, ifFalse: any) {
 }
 
 /**
+ * Boolean condition
+ */
+export function booleanCond(condition: any) {
+  return {
+    $cond: {
+      if: condition,
+      then: true,
+      else: false,
+    }
+  }
+}
+
+/**
  * Get regex expression
  */
 export function regex(value: RegExp) {
@@ -470,5 +483,6 @@ export const $agg = {
   concat,
   concatWith,
   cond,
+  booleanCond,
   regex,
 };
