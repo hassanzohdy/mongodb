@@ -16,6 +16,6 @@ export function arrayOf(values: any[]) {
       return [value];
     }
 
-    return undefined;
+    return null;
   };
 }

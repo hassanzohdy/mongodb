@@ -575,7 +575,7 @@ export class Model extends RelationshipModel {
         return value;
       };
 
-      if (Array.isArray(value) && castType !== "localized") {
+      if (Array.isArray(value) && castType !== "localized" && ! Array.isArray(castType)) {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(

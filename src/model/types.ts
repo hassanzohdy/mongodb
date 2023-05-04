@@ -101,6 +101,7 @@ export type CastType =
   | "any"
   | "mixed"
   | CustomCastType
+  | [CustomCastType]
   | Model;
 
 export type Casts = {
