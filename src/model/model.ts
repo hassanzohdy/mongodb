@@ -575,7 +575,10 @@ export class Model extends RelationshipModel {
         return value;
       };
 
-      if (Array.isArray(value) && castType !== "localized" && ! Array.isArray(castType)) {
+      if (Array.isArray(castType)) {
+        value = await castType[0](value, column, this);
+      }
+      else if (Array.isArray(value) && castType !== "localized") {
         // if cast type is array, then we'll keep the value as it is
         if (castType !== "array") {
           value = await Promise.all(
@@ -583,7 +586,6 @@ export class Model extends RelationshipModel {
           );
         }
       } else {
-        value = await castValue(value);
       }
 
       this.set(column, value);
