@@ -1,3 +1,3 @@
 export function castEmail(value: string) {
-  return value.toLowerCase();
+  return String(value).toLowerCase();
 }

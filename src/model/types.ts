@@ -76,7 +76,7 @@ export type CollectionDocument<T> = ModelDocument &
     updatedAt?: Date;
   };
 
-export type CustomCastType = (column: string, value: any, model: Model) => any;
+export type CustomCastType = (value: any, column: string, model: Model) => any;
 
 /**
  * Custom casts
