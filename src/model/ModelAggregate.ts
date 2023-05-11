@@ -16,7 +16,7 @@ export class ModelAggregate<T> extends Aggregate {
    * {@inheritDoc}
    */
   public async get(
-    mapData: (record: any) => any = (record) => new this.model(record)
+    mapData: (record: any) => any = record => new this.model(record),
   ) {
     return (await super.get(mapData)) as T[];
   }
@@ -40,7 +40,7 @@ export class ModelAggregate<T> extends Aggregate {
    */
   public async paginate<G = T>(
     page = 1,
-    limit = this.model.perPage
+    limit = this.model.perPage,
   ): Promise<PaginationListing<G>> {
     return await super.paginate<G>(page, limit);
   }

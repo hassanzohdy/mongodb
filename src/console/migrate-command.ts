@@ -7,7 +7,7 @@ export function registerMigrationCommand(migrationsList: any[]) {
     .description("Generate Database Migrations")
     .option("-f, --fresh", "Drop all migrations and generate fresh migrations")
     .option("-l, --list", "List all migrations")
-    .action((options) => {
+    .action(options => {
       connectToDatabase();
       setMigrationsList(migrationsList);
       if (options.list) {

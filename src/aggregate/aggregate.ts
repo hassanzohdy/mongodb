@@ -522,9 +522,11 @@ export class Aggregate {
   public async explain() {
     const collection = this.database.collection(this.collection);
 
-    return await collection.aggregate(this.parse(), {
-      explain: true,
-    });
+    return await collection
+      .aggregate(this.parse(), {
+        explain: true,
+      })
+      .explain();
   }
 
   /**

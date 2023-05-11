@@ -36,7 +36,7 @@ export class ModelSync {
   public constructor(
     protected model: typeof Model,
     protected columns: string | string[],
-    protected embedMethod = "embedData"
+    protected embedMethod = "embedData",
   ) {
     //
   }
@@ -98,7 +98,7 @@ export class ModelSync {
   public async sync(
     model: Model,
     saveMode: "create" | "update",
-    oldModel?: Model
+    oldModel?: Model,
   ) {
     if (saveMode === "update") {
       return this.syncUpdate(model, oldModel);
@@ -138,8 +138,8 @@ export class ModelSync {
       // now check if any of the columns has changed
       // if all of them are the same, then we don't need to update
       if (
-        this._updateWhenChange.every((column) =>
-          areEqual(model.get(column), oldModel.get(column))
+        this._updateWhenChange.every(column =>
+          areEqual(model.get(column), oldModel.get(column)),
         )
       ) {
         return;
@@ -167,16 +167,41 @@ export class ModelSync {
         ? (model as any)[this.embedMethod]()
         : model.embeddedData;
 
-    for (const currentModel of models) {
+    for (const updatingModel of models) {
       for (const column of columns) {
         if (this.syncMode === "single") {
-          currentModel.set(column, modelData);
+          updatingModel.set(column, modelData);
         } else {
-          currentModel.reassociate(column, modelData);
+          if (column.includes(".")) {
+            // if column includes dot, then it's a nested column
+            // so we need to get the top document key as it should be an array.
+            const [topKey, nestedKey] = column.split(".");
+            const documentsList = updatingModel.get(topKey) || [];
+            // as we're updating, so there should be at least one document
+            if (documentsList?.length === 0) continue;
+            // now we need to find the document that has the same id as the model we're updating
+            const documentIndex = documentsList.findIndex(
+              (document: any) => document[nestedKey]?.id === model.get("id"),
+            );
+            // if document is not found, then we don't need to update
+            if (documentIndex === -1) continue;
+
+            // now we need to update the document
+            documentsList[documentIndex][nestedKey] = modelData;
+
+            // and finally set the updated documents list
+            updatingModel.set(topKey, documentsList);
+          } else {
+            // otherwise, it is a direct column update so we can just set it
+            updatingModel.reassociate(column, modelData);
+          }
         }
       }
 
-      await currentModel.save();
+      // disable casting so we can save the data as it is
+      await updatingModel.save(undefined, {
+        cast: false,
+      });
     }
   }
 

@@ -17,7 +17,7 @@ export abstract class RelationshipModel extends CrudModel {
    */
   public hasMany<T extends Model = Model>(
     modelClass: typeof Model,
-    column: string
+    column: string,
   ) {
     return new RelationshipWithMany<T>(this as any, modelClass, column);
   }
@@ -61,7 +61,7 @@ export abstract class RelationshipModel extends CrudModel {
    */
   public static syncMany(
     columns: string | string[],
-    embedMethod = "embedData"
+    embedMethod = "embedData",
   ) {
     return new ModelSync(this as typeof Model, columns, embedMethod).syncMany();
   }
@@ -78,7 +78,7 @@ export abstract class RelationshipModel extends CrudModel {
     this: Model,
     column: string,
     model: Model | ModelDocument,
-    embedWith?: string
+    embedWith?: string,
   ) {
     const columnValue =
       model instanceof Model
@@ -93,7 +93,7 @@ export abstract class RelationshipModel extends CrudModel {
     const documentsList = clone(this.get(column, []));
 
     const index = documentsList.findIndex(
-      (doc: any) => doc.id === columnValue.id
+      (doc: any) => doc.id === columnValue.id,
     );
 
     if (index === -1) {
@@ -114,7 +114,7 @@ export abstract class RelationshipModel extends CrudModel {
     this: Model,
     column: string,
     model: Model | ModelDocument,
-    embedWith?: string
+    embedWith?: string,
   ) {
     const columnValue =
       model instanceof Model
@@ -140,7 +140,7 @@ export abstract class RelationshipModel extends CrudModel {
   public disassociate(
     this: Model,
     column: string,
-    model: Model | ModelDocument
+    model: Model | ModelDocument,
   ) {
     const columnValue = model instanceof Model ? model.embeddedData : model;
 
@@ -151,7 +151,7 @@ export abstract class RelationshipModel extends CrudModel {
     if (!Array.isArray(documentsList)) return this;
 
     const index = documentsList.findIndex(
-      (doc: any) => doc.id === columnValue.id
+      (doc: any) => doc.id === columnValue.id,
     );
 
     if (index !== -1) {
@@ -168,9 +168,9 @@ export abstract class RelationshipModel extends CrudModel {
    */
   public syncUpdateWhenChange(
     columns: string | string[],
-    syncModels: ModelSync[]
+    syncModels: ModelSync[],
   ) {
-    return syncModels.map((syncModel) => {
+    return syncModels.map(syncModel => {
       syncModel.updateWhenChange(columns);
 
       return syncModel;

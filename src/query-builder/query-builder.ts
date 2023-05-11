@@ -44,7 +44,7 @@ export class QueryBuilder {
   public async update(
     collection: string,
     filter: Filter,
-    data: Document
+    data: Document,
   ): Promise<Partial<ModelDocument> | null> {
     // get the query of the current collection
     const query = this.query(collection);
@@ -56,7 +56,7 @@ export class QueryBuilder {
       },
       {
         returnDocument: "after",
-      }
+      },
     );
 
     return result.ok ? result.value : null;
@@ -68,7 +68,7 @@ export class QueryBuilder {
   public async replace(
     collection: string,
     filter: Filter,
-    data: Document
+    data: Document,
   ): Promise<Partial<ModelDocument> | null> {
     const query = this.query(collection);
 
@@ -86,7 +86,7 @@ export class QueryBuilder {
   public async upsert(
     collection: string,
     filter: Filter,
-    data: Document
+    data: Document,
   ): Promise<Partial<ModelDocument> | null> {
     // get the query of the current collection
     const query = this.query(collection);
@@ -100,7 +100,7 @@ export class QueryBuilder {
       {
         returnDocument: "after",
         upsert: true,
-      }
+      },
     );
 
     return result.ok ? result.value : null;
@@ -122,7 +122,7 @@ export class QueryBuilder {
    */
   public async delete(
     collection: string,
-    filter: Filter = {}
+    filter: Filter = {},
   ): Promise<number> {
     const query = this.query(collection);
 
@@ -137,11 +137,11 @@ export class QueryBuilder {
   public async first<T = Document>(
     collection: string,
     filter: Filter = {},
-    findOptions?: FindOptions
-  ): Promise<T | null> {
+    findOptions?: FindOptions,
+  ) {
     const query = this.query(collection);
 
-    return await query.findOne(filter, findOptions);
+    return await query.findOne<T>(filter, findOptions);
   }
 
   /**
@@ -168,7 +168,7 @@ export class QueryBuilder {
     collection: string,
     filter: Filter = {},
     queryHandler?: (query: FindCursor) => void,
-    findOptions?: FindOptions
+    findOptions?: FindOptions,
   ) {
     const query = this.query(collection);
 
@@ -201,7 +201,7 @@ export class QueryBuilder {
   public async distinct(
     collection: string,
     field: string,
-    filter: Filter = {}
+    filter: Filter = {},
   ) {
     const query = this.query(collection);
 
@@ -213,6 +213,17 @@ export class QueryBuilder {
    */
   public async count(collection: string, filter: Filter = {}) {
     return await this.query(collection).countDocuments(filter);
+  }
+
+  /**
+   * Create an explain fetch query
+   */
+  public async explain(collection: string, filter: Filter = {}) {
+    return await this.query(collection)
+      .find(filter, {
+        explain: true,
+      })
+      .explain();
   }
 }
 

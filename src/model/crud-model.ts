@@ -161,6 +161,16 @@ export abstract class CrudModel extends BaseModel {
   }
 
   /**
+   * Create an explain plan for the given filter
+   */
+  public static async explain<T>(this: ChildModel<T>, filter: Filter = {}) {
+    return await queryBuilder.explain(
+      this.collection,
+      this.prepareFilters(filter),
+    );
+  }
+
+  /**
    * List multiple documents based on the given filter
    */
   public static async list<T>(

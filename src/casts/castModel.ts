@@ -2,7 +2,7 @@ import { Model } from "../model";
 
 export function castModel(
   model: typeof Model,
-  embeddedKey: string | string[] = "embeddedData"
+  embeddedKey: string | string[] = "embeddedData",
 ) {
   return async function injectEmbeddedData(value: any) {
     if (Array.isArray(value)) {
@@ -14,11 +14,11 @@ export function castModel(
         .aggregate()
         .whereIn(
           "id",
-          value.map((value) => Number(value.id || value))
+          value.map(value => Number(value.id || value)),
         )
         .get();
 
-      return records.map((record) => {
+      return records.map(record => {
         if (Array.isArray(embeddedKey)) {
           return record.only(embeddedKey);
         }

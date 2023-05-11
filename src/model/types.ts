@@ -63,14 +63,14 @@ export type ModelDocument = WithId<{
   /**
    * Auto Increment id
    */
-  id: number;
+  id?: number;
   /**
    * Dynamic columns
    */
   [key: string]: any;
 }>;
 
-export type CollectionDocument<T> = ModelDocument &
+export type WithTimestampsDocument<T> = ModelDocument &
   T & {
     createdAt?: Date;
     updatedAt?: Date;

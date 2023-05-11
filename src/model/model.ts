@@ -1,5 +1,6 @@
 import {
   areEqual,
+  clone,
   except,
   get,
   merge,
@@ -18,10 +19,16 @@ import {
   CustomCastType,
   CustomCasts,
   Document,
-  ModelDocument,
 } from "./types";
 
-type Schema = ModelDocument;
+// type Schema = Document | ModelDocument;
+
+export type Schema = Record<string, any> & {
+  _id?: ObjectId;
+  id?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
 
 export class Model extends RelationshipModel {
   /**
@@ -141,14 +148,21 @@ export class Model extends RelationshipModel {
   public request?: any;
 
   /**
+   * Original data
+   */
+  public originalData: Schema = {} as Schema;
+
+  /**
    * Constructor
    */
-  public constructor(public originalData: Schema | Model = {} as Schema) {
+  public constructor(originalData: Schema | Model = {} as Schema) {
     //
     super();
 
-    if (this.originalData instanceof Model) {
-      this.originalData = { ...this.originalData.data };
+    if (originalData instanceof Model) {
+      this.originalData = clone(originalData.data) as Schema;
+    } else {
+      this.originalData = clone(originalData) as Schema;
     }
 
     this.originalData = this.castDates(this.originalData);
@@ -158,12 +172,21 @@ export class Model extends RelationshipModel {
         this.originalData._id = new ObjectId(this.originalData._id);
       } catch (error) {
         //
+        console.log(error);
       }
     }
 
-    this.data = { ...this.originalData };
+    this.data = clone(this.originalData);
 
-    this.initialData = { ...this.originalData };
+    this.initialData = clone(this.originalData);
+
+    // this is necessary as clone() will generate a new _id for the data
+    // so we need to keep the original _id
+    if (originalData?._id) {
+      this.originalData._id = new ObjectId(originalData._id);
+      this.data._id = new ObjectId(originalData._id);
+      this.initialData._id = new ObjectId(originalData._id);
+    }
   }
 
   /**
@@ -345,11 +368,14 @@ export class Model extends RelationshipModel {
   public async save(
     mergedData?: Omit<Schema, "id" | "_id">,
     {
-      triggerEvents,
+      triggerEvents = true,
+      cast = true,
     }: {
       triggerEvents?: boolean;
+      cast?: boolean;
     } = {
       triggerEvents: true,
+      cast: true,
     },
   ) {
     try {
@@ -367,8 +393,9 @@ export class Model extends RelationshipModel {
         // check if the data has changed
         // if not changed, then do not do anything
 
-        if (this.shouldUpdate(this.originalData, this.data) === false)
+        if (this.shouldUpdate(this.originalData, this.data) === false) {
           return this;
+        }
 
         currentModel = this.clone();
 
@@ -381,7 +408,9 @@ export class Model extends RelationshipModel {
           (this.data as any)[updatedAtColumn] = new Date();
         }
 
-        await this.castData();
+        if (cast) {
+          await this.castData();
+        }
 
         if (triggerEvents) {
           const selfModelEvents = this.getModelEvents();
@@ -415,39 +444,33 @@ export class Model extends RelationshipModel {
           ModelEvents.trigger("saved", this, currentModel);
         }
       } else {
-        // creating a new document in the database
-        const generateNextId =
-          this.getStaticProperty("generateNextId").bind(Model);
-
         // check for default values and merge it with the data
         this.checkDefaultValues();
 
         // if the column does not exist, then create it
         if (!this.data.id) {
-          this.data.id = await generateNextId();
+          await this.generateNextId();
         }
 
         const now = new Date();
 
-        const createdAtColumn = this.createdAtColumn;
-
-        const createdAtValue = this.get(createdAtColumn, now);
+        const createdAtColumn = this.createdAtColumn as "createdAt";
 
         // if the column does not exist, then create it
-        if (createdAtValue) {
-          this.data[createdAtColumn as keyof Schema] = createdAtValue;
+        if (createdAtColumn) {
+          this.data[createdAtColumn] = now;
         }
 
         // if the column does not exist, then create it
-        const updatedAtColumn = this.updatedAtColumn;
+        const updatedAtColumn = this.updatedAtColumn as "updatedAt";
 
-        const updatedAtValue = this.get(updatedAtColumn, now);
-
-        if (updatedAtValue) {
-          this.data[updatedAtColumn as keyof Schema] = updatedAtValue;
+        if (updatedAtColumn) {
+          this.data[updatedAtColumn] = now;
         }
 
-        await this.castData();
+        if (cast) {
+          await this.castData();
+        }
 
         if (triggerEvents) {
           const selfModelEvents = this.getModelEvents();
@@ -479,7 +502,10 @@ export class Model extends RelationshipModel {
         }
       }
 
-      this.originalData = { ...this.data };
+      this.originalData = clone(this.data);
+
+      // @see constructor
+      this.originalData._id = this.data._id;
 
       this.startSyncing(mode, currentModel);
 
@@ -492,11 +518,27 @@ export class Model extends RelationshipModel {
   }
 
   /**
+   * Generate and return next id
+   */
+  public async generateNextId() {
+    this.set(
+      "id",
+      await this.getStaticProperty("generateNextId").bind(Model)(),
+    );
+
+    return this.id;
+  }
+
+  /**
    * Perform saving but without any events triggers
    */
-  public async silentSaving(mergedData?: Omit<Schema, "id" | "_id">) {
+  public async silentSaving(
+    mergedData?: Omit<Schema, "id" | "_id">,
+    options?: { cast?: boolean },
+  ) {
     return await this.save(mergedData, {
       triggerEvents: false,
+      ...(options || {}),
     });
   }
 
@@ -742,7 +784,11 @@ export class Model extends RelationshipModel {
    *
    * Dirty columns are columns that their values have been changed from the original data
    */
-  public isDirty(column: string) {
+  public isDirty(column?: string) {
+    if (!column) {
+      return areEqual(this.data, this.originalData) === false;
+    }
+
     if (this.isNewModel()) return true;
 
     const currentValue = get(this.data, column);
@@ -784,7 +830,7 @@ export class Model extends RelationshipModel {
    * Clone the model
    */
   public clone() {
-    return new (this.constructor as any)({ ...this.data });
+    return new (this.constructor as any)(clone(this.data));
   }
 }
 
