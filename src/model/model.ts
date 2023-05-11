@@ -165,16 +165,15 @@ export class Model extends RelationshipModel {
       this.originalData = clone(originalData) as Schema;
     }
 
-    this.originalData = this.castDates(this.originalData);
-
-    if (typeof this.originalData._id === "string") {
+    if (typeof originalData._id === "string") {
       try {
-        this.originalData._id = new ObjectId(this.originalData._id);
+        originalData._id = new ObjectId(originalData._id);
       } catch (error) {
-        //
-        console.log(error);
+        originalData._id = new ObjectId();
       }
     }
+
+    this.originalData = this.castDates(this.originalData);
 
     this.data = clone(this.originalData);
 
