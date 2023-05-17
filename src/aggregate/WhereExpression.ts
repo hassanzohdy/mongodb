@@ -33,6 +33,8 @@ export class WhereExpression {
     size: "$size",
     like: "$regex",
     notLike: "$regex",
+    startsWith: "$regex",
+    endsWith: "$regex",
   };
 
   /**
@@ -67,6 +69,10 @@ export class WhereExpression {
       value = {
         $regex: value,
       };
+    } else if (operator === "startsWith") {
+      value = new RegExp(`^${value}`, "i");
+    } else if (operator === "endsWith") {
+      value = new RegExp(`${value}$`, "i");
     }
 
     let expression = {

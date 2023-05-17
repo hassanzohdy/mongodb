@@ -24,10 +24,12 @@ export const whereOperators = [
   "size",
   "like",
   "notLike",
+  "startsWith",
+  "endsWith",
 ] as const;
 
 // export type WhereOperator  where it is  type is one of where operator's array values
-export type WhereOperator = typeof whereOperators[number];
+export type WhereOperator = (typeof whereOperators)[number];
 
 export type MongoDBOperator =
   | "$eq"

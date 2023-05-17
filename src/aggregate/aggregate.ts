@@ -315,6 +315,20 @@ export class Aggregate {
   }
 
   /**
+   * Where column starts with the given value
+   */
+  public whereStartsWith(column: string, value: string | number) {
+    return this.where(column, "startsWith", value);
+  }
+
+  /**
+   * Where column ends with the given value
+   */
+  public whereEndsWith(column: string, value: string | number) {
+    return this.where(column, "endsWith", value);
+  }
+
+  /**
    * Where between operator
    */
   public whereBetween(column: string, value: [any, any]) {
