@@ -1,10 +1,10 @@
 import { ObjectId } from "mongodb";
-import { queryBuilder } from "../query-builder/query-builder";
 import { BaseModel } from "./base-model";
 import {
   ChildModel,
   Document,
   Filter,
+  ModelDeleteStrategy,
   ModelDocument,
   PaginationListing,
   PrimaryIdType,
@@ -87,8 +87,24 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     id: PrimaryIdType,
   ): Promise<T | null> {
+    const deleteStrategy = this.deleteStrategy;
+
+    if (deleteStrategy === ModelDeleteStrategy.softDelete) {
+      const model = await this.query.first(this.collection, {
+        id,
+      });
+
+      if (!model) return null;
+
+      model.unset("deletedAt");
+
+      await model.save();
+
+      return model as T;
+    }
+
     // retrieve the document from trash collection
-    const result = await queryBuilder.first(
+    const result = await this.query.first(
       this.collection + "Trash",
       this.prepareFilters({
         [this.primaryIdColumn]: id,
@@ -112,6 +128,48 @@ export abstract class CrudModel extends BaseModel {
   }
 
   /**
+   * Restore all documents from trash or by the given filter
+   */
+  public static async restoreAll<T>(this: ChildModel<T>, filter?: Filter) {
+    const deleteStrategy = this.deleteStrategy;
+
+    if (deleteStrategy === ModelDeleteStrategy.softDelete) {
+      const models = await this.query.list(this.collection, filter);
+
+      for (const model of models) {
+        model.unset("deletedAt");
+
+        await model.save();
+      }
+
+      return models;
+    }
+
+    if (filter) {
+      for (const key in filter) {
+        filter[`document.` + key] = filter[key];
+        delete filter[key];
+      }
+    }
+
+    const documents = await this.query.list(this.collection + "Trash", filter);
+
+    const models = [];
+
+    for (const document of documents) {
+      const model = this.self(document.document);
+
+      model.markAsRestored();
+
+      await model.save();
+
+      models.push(model);
+    }
+
+    return models;
+  }
+
+  /**
    * Find and update the document for the given filter with the given data or create a new document/record
    * if filter has no matching
    */
@@ -125,7 +183,7 @@ export abstract class CrudModel extends BaseModel {
     let model = (await this.first(filter)) as any;
 
     if (!model) {
-      model = this.self({ ...data, ...filter });
+      model = this.self(data);
     } else {
       model.merge(data);
     }
@@ -150,7 +208,7 @@ export abstract class CrudModel extends BaseModel {
     column: string,
     value: any,
   ): Promise<T | null> {
-    const result = await queryBuilder.first(
+    const result = await this.query.first(
       this.collection,
       this.prepareFilters({
         [column]: value,
@@ -164,7 +222,7 @@ export abstract class CrudModel extends BaseModel {
    * Create an explain plan for the given filter
    */
   public static async explain<T>(this: ChildModel<T>, filter: Filter = {}) {
-    return await queryBuilder.explain(
+    return await this.query.explain(
       this.collection,
       this.prepareFilters(filter),
     );
@@ -177,7 +235,7 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     filter: Filter = {},
   ): Promise<T[]> {
-    const documents = await queryBuilder.list(
+    const documents = await this.query.list(
       this.collection,
       this.prepareFilters(filter),
     );
@@ -196,15 +254,11 @@ export abstract class CrudModel extends BaseModel {
   ): Promise<PaginationListing<T>> {
     filter = this.prepareFilters(filter);
 
-    const documents = await queryBuilder.list(
-      this.collection,
-      filter,
-      query => {
-        query.skip((page - 1) * limit).limit(limit);
-      },
-    );
+    const documents = await this.query.list(this.collection, filter, query => {
+      query.skip((page - 1) * limit).limit(limit);
+    });
 
-    const totalDocumentsOfFilter = await queryBuilder.count(
+    const totalDocumentsOfFilter = await this.query.count(
       this.collection,
       filter,
     );
@@ -227,10 +281,7 @@ export abstract class CrudModel extends BaseModel {
    * Count total documents based on the given filter
    */
   public static async count(filter: Filter = {}) {
-    return await queryBuilder.count(
-      this.collection,
-      this.prepareFilters(filter),
-    );
+    return await this.query.count(this.collection, this.prepareFilters(filter));
   }
 
   /**
@@ -240,7 +291,7 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     filter: Filter = {},
   ): Promise<T | null> {
-    const result = await queryBuilder.first(
+    const result = await this.query.first(
       this.collection,
       this.prepareFilters(filter),
     );
@@ -255,7 +306,7 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     filter: Filter = {},
   ): Promise<T | null> {
-    const result = await queryBuilder.last(
+    const result = await this.query.last(
       this.collection,
       this.prepareFilters(filter),
     );
@@ -270,7 +321,7 @@ export abstract class CrudModel extends BaseModel {
     this: ChildModel<T>,
     filter: Filter = {},
   ): Promise<T[]> {
-    const documents = await queryBuilder.latest(
+    const documents = await this.query.latest(
       this.collection,
       this.prepareFilters(filter),
     );
@@ -291,7 +342,7 @@ export abstract class CrudModel extends BaseModel {
       typeof filter === "string" ||
       typeof filter === "number"
     ) {
-      return (await queryBuilder.deleteOne(
+      return (await this.query.deleteOne(
         this.collection,
         this.prepareFilters({
           [this.primaryIdColumn]: filter,
@@ -301,7 +352,7 @@ export abstract class CrudModel extends BaseModel {
         : 0;
     }
 
-    return await queryBuilder.delete(this.collection, filter);
+    return await this.query.delete(this.collection, filter);
   }
 
   /**
@@ -312,7 +363,7 @@ export abstract class CrudModel extends BaseModel {
     column: string,
     filter: Filter = {},
   ): Promise<any[]> {
-    return await queryBuilder.distinct(
+    return await this.query.distinct(
       this.collection,
       column,
       this.prepareFilters(filter),
@@ -326,6 +377,15 @@ export abstract class CrudModel extends BaseModel {
     // if filter contains _id and it is a string, convert it to ObjectId
     if (filters._id && typeof filters._id === "string") {
       filters._id = new ObjectId(filters._id);
+    }
+
+    const deleteStrategy = this.deleteStrategy;
+
+    if (
+      deleteStrategy === ModelDeleteStrategy.softDelete &&
+      !filters.withDeleted
+    ) {
+      filters.deletedAt = null;
     }
 
     (this as any).events().trigger("fetching", this, filters);

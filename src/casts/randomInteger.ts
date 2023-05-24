@@ -1,5 +1,9 @@
 import { Random } from "@mongez/reinforcements";
 
 export function randomInteger(min: number, max: number) {
-  return () => Random.integer(min, max);
+  return (value: any) => {
+    if (value) return value;
+
+    return Random.integer(min, max);
+  };
 }

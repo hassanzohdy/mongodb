@@ -1,11 +1,11 @@
-import { Collection } from "mongodb";
+import { Random } from "@mongez/reinforcements";
 import { bluePrint } from "../blueprint";
 import { database, Database } from "../database";
+import { query } from "../query";
 import { masterMind } from "./master-mind";
 import { Model } from "./model";
 import { ModelEvents } from "./model-events";
-import { ChildModel, Document } from "./types";
-import { Random } from "@mongez/reinforcements";
+import { ChildModel, Document, ModelDeleteStrategy } from "./types";
 
 const modelEvents = new Map<string, ModelEvents>();
 
@@ -57,11 +57,28 @@ export abstract class BaseModel {
   public static primaryIdColumn = "id";
 
   /**
-   * Get collection query
+   * Query instance
    */
-  public static query() {
-    return this.database.collection(this.collection);
-  }
+  public static query = query;
+
+  /**
+   * Define the delete method
+   *
+   * @default true
+   */
+  public static deleteStrategy: ModelDeleteStrategy =
+    ModelDeleteStrategy.moveToTrash;
+
+  /**
+   * Items per page
+   */
+  public static perPage = 15;
+
+  /**
+   * If set to true, then only the original data and the data in the casts property will be saved
+   * If set to false, all data will be saved
+   */
+  public static isStrict = true;
 
   /**
    * Get increment id by
@@ -118,8 +135,8 @@ export abstract class BaseModel {
   /**
    * Get collection query
    */
-  public getQuery(): Collection {
-    return this.getStaticProperty("query")();
+  public getQuery() {
+    return this.getStaticProperty("query");
   }
 
   /**

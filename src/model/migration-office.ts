@@ -1,6 +1,6 @@
 import chalk from "chalk";
-import { connection, Connection } from "../connection";
-import { queryBuilder } from "../query-builder/query-builder";
+import { Query, query } from "../query";
+import { Model } from "./model";
 
 export class MigrationOffice {
   /**
@@ -11,13 +11,13 @@ export class MigrationOffice {
   /**
    * Connection Instance
    */
-  protected connection: Connection = connection;
+  public query: Query = query;
 
   /**
    * Check if the given migration name is already migrated
    */
   public async isMigrated(migrationName: string): Promise<boolean> {
-    const migrationDocument = await queryBuilder.first(this.collection, {
+    const migrationDocument = await this.query.first(this.collection, {
       name: migrationName,
     });
 
@@ -28,7 +28,12 @@ export class MigrationOffice {
    * Migrate the given migration name
    */
   public async migrate(migrationName: string) {
-    await queryBuilder.create(this.collection, {
+    const collectionName = this.collection;
+    class Migration extends Model {
+      public static collection = collectionName;
+    }
+
+    await Migration.create({
       name: migrationName,
       createdAt: new Date(),
     });
@@ -42,15 +47,15 @@ export class MigrationOffice {
       chalk.blue("→"),
       chalk.cyan("[migration]"),
       chalk.redBright("Dropping"),
-      "all migrations"
+      "all migrations",
     );
 
-    await queryBuilder.delete(this.collection);
+    await this.query.delete(this.collection);
 
     console.log(
       chalk.green("✓"),
       chalk.cyan("[migration]"),
-      "All migrations has been " + chalk.greenBright("dropped successfully.")
+      "All migrations has been " + chalk.greenBright("dropped successfully."),
     );
   }
 
@@ -58,7 +63,7 @@ export class MigrationOffice {
    * Drop the given migration name
    */
   public async dropMigration(migrationName: string) {
-    await queryBuilder.delete(this.collection, {
+    await this.query.delete(this.collection, {
       name: migrationName,
     });
   }
@@ -67,7 +72,7 @@ export class MigrationOffice {
    * Get migrations list
    */
   public async list() {
-    return await queryBuilder.list(this.collection);
+    return await this.query.list(this.collection);
   }
 }
 

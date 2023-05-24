@@ -19,7 +19,7 @@ export class DatabaseLog extends LogChannel {
     module: string,
     action: string,
     message: any,
-    level: LogLevel
+    level: LogLevel,
   ) {
     if (!this.model.database?.connection?.isConnected()) return;
 

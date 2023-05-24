@@ -1,10 +1,9 @@
 import { log } from "@mongez/logger";
 import { GenericObject, get } from "@mongez/reinforcements";
 import { ObjectId } from "mongodb";
-import { Database, database } from "../database";
 import { Filter, PaginationListing } from "../model";
 import { ModelEvents } from "../model/model-events";
-import { queryBuilder } from "../query-builder/query-builder";
+import { query } from "../query";
 import { DeselectPipeline } from "./DeselectPipeline";
 import { GroupByPipeline } from "./GroupByPipeline";
 import { LimitPipeline } from "./LimitPipeline";
@@ -31,14 +30,14 @@ export class Aggregate {
   protected pipelines: Pipeline[] = [];
 
   /**
-   * Database instance
-   */
-  protected database: Database = database;
-
-  /**
    * Aggregate events
    */
   public static _events = new ModelEvents();
+
+  /**
+   * Query manager
+   */
+  public query = query;
 
   /**
    * Constructor
@@ -350,7 +349,7 @@ export class Aggregate {
       await this.select(["_id"]).pluck("_id")
     ).map(_id => new ObjectId(_id));
 
-    return await queryBuilder.delete(this.collection, {
+    return await query.delete(this.collection, {
       _id: ids,
     });
   }
@@ -433,7 +432,7 @@ export class Aggregate {
    * // TODO: Make a proper implementation
    * Where location near
    */
-  public whereNear(column: string, value: [number, number], distance: number) {
+  public whereNear(column: string, value: [number, number], _distance: number) {
     return this.where(column, "near", value);
   }
 
@@ -444,8 +443,8 @@ export class Aggregate {
   public async whereNearByIn(
     column: string,
     value: [number, number],
-    minDistance: number,
-    maxDistance: number,
+    _inDistance: number,
+    _maxDistance: number,
   ) {
     return this.where(column, value);
   }
@@ -534,13 +533,11 @@ export class Aggregate {
    * Explain the query
    */
   public async explain() {
-    const collection = this.database.collection(this.collection);
-
-    return await collection
-      .aggregate(this.parse(), {
+    return (
+      await this.query.aggregate(this.collection, this.parse(), {
         explain: true,
       })
-      .explain();
+    ).explain();
   }
 
   /**
@@ -579,8 +576,6 @@ export class Aggregate {
    */
   public async update(data: any) {
     try {
-      const collection = this.database.collection(this.collection);
-
       const query: any[] = [];
 
       const filters = {};
@@ -593,7 +588,7 @@ export class Aggregate {
         }
       });
 
-      const results = await collection.updateMany(filters, [
+      const results = await this.query.updateMany(this.collection, filters, [
         ...query,
         {
           $set: data,
@@ -613,8 +608,6 @@ export class Aggregate {
    */
   public async unset(...columns: string[]) {
     try {
-      const collection = this.database.collection(this.collection);
-
       const query: any[] = [];
 
       const filters = {};
@@ -627,7 +620,7 @@ export class Aggregate {
         }
       });
 
-      const results = await collection.updateMany(filters, [
+      const results = await this.query.updateMany(this.collection, filters, [
         ...query,
         {
           $unset: columns,
@@ -646,9 +639,9 @@ export class Aggregate {
    * Execute the query
    */
   public async execute() {
-    const collection = this.database.collection(this.collection);
-
-    const results = await collection.aggregate(this.parse()).toArray();
+    const results = (
+      await this.query.aggregate(this.collection, this.parse())
+    ).toArray();
 
     return results;
   }

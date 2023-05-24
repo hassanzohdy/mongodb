@@ -30,7 +30,7 @@ export class MasterMind {
   public async generateNextId(
     collection: string,
     incrementIdBy = 1,
-    initialId = 1
+    initialId = 1,
   ): Promise<number> {
     const query = this.database.collection(this.collection);
 
@@ -50,7 +50,7 @@ export class MasterMind {
           $set: {
             id: nextId,
           },
-        }
+        },
       );
 
       return nextId;

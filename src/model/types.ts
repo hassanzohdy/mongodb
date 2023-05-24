@@ -12,6 +12,40 @@ export type PrimaryIdType = string | number | ObjectId;
 export type ChildModel<T> = typeof Model & (new () => T);
 
 /**
+ * Model delete strategy
+ *
+ * @default moveToTrash
+ */
+export enum ModelDeleteStrategy {
+  "softDelete",
+  "moveToTrash",
+  "hardDelete",
+}
+
+export type PaginationInfo = {
+  /**
+   * Limit of the query
+   */
+  limit: number;
+  /**
+   * Results of the query
+   */
+  result: number;
+  /**
+   * Current page of the query
+   */
+  page: number;
+  /**
+   * total results of the query
+   */
+  total: number;
+  /**
+   * total pages of the query
+   */
+  pages: number;
+};
+
+/**
  * The result of the paginate query
  */
 export type PaginationListing<T> = {
@@ -22,28 +56,7 @@ export type PaginationListing<T> = {
   /**
    * The pagination results
    */
-  paginationInfo: {
-    /**
-     * Limit of the query
-     */
-    limit: number;
-    /**
-     * Results of the query
-     */
-    result: number;
-    /**
-     * Current page of the query
-     */
-    page: number;
-    /**
-     * total results of the query
-     */
-    total: number;
-    /**
-     * total pages of the query
-     */
-    pages: number;
-  };
+  paginationInfo: PaginationInfo;
 };
 
 /**

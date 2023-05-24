@@ -8,6 +8,6 @@ export * from "./database";
 export * from "./migrate";
 export * from "./model";
 export * from "./models";
-export * from "./query-builder";
+export * from "./query";
 export * from "./types";
 export * from "./utils";

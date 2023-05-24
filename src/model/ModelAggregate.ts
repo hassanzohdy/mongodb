@@ -9,7 +9,7 @@ export class ModelAggregate<T> extends Aggregate {
    */
   public constructor(protected readonly model: any) {
     super(model.collection);
-    this.database = model.database;
+    this.query = model.query;
   }
 
   /**

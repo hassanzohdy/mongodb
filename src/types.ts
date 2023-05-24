@@ -4,25 +4,29 @@ export type DatabaseConfigurations = {
   /**
    * Database host
    */
-  host: string;
+  host?: string;
   /**
    * Database port
    */
-  port: number;
+  port?: number;
   /**
    * Database username
    */
-  username: string;
+  username?: string;
   /**
    * Database password
    */
-  password: string;
+  password?: string;
   /**
    * Database name
    */
-  name: string;
+  database?: string;
   /**
    * Database authentication
    */
-  dbAuth: string;
+  dbAuth?: string;
+  /**
+   * Database URL string
+   */
+  url?: string;
 } & Partial<MongoClientOptions>;

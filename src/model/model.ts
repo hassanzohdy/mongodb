@@ -11,7 +11,6 @@ import Is from "@mongez/supportive-is";
 import { fromUTC, now, toUTC } from "@mongez/time-wizard";
 import dayjs from "dayjs";
 import { ObjectId } from "mongodb";
-import { queryBuilder } from "../query-builder/query-builder";
 import { RelationshipModel } from "./relationships";
 import {
   CastType,
@@ -19,6 +18,7 @@ import {
   CustomCastType,
   CustomCasts,
   Document,
+  ModelDeleteStrategy,
 } from "./types";
 
 // type Schema = Document | ModelDocument;
@@ -40,24 +40,6 @@ export class Model extends RelationshipModel {
    * Model Document data
    */
   public data!: Schema;
-
-  /**
-   * Determine whether to move document to trash or not before deleting it permanently
-   *
-   * @default true
-   */
-  public moveToTrash = true;
-
-  /**
-   * Items per page
-   */
-  public perPage = 15;
-
-  /**
-   * If set to true, then only the original data and the data in the casts property will be saved
-   * If set to false, all data will be saved
-   */
-  public isStrict = true;
 
   /**
    * Define Default value data that will be merged with the models' data
@@ -143,11 +125,6 @@ export class Model extends RelationshipModel {
   public dateFormat = "DD-MM-YYYY";
 
   /**
-   * Current request object
-   */
-  public request?: any;
-
-  /**
    * Original data
    */
   public originalData: Schema = {} as Schema;
@@ -186,15 +163,6 @@ export class Model extends RelationshipModel {
       this.data._id = new ObjectId(originalData._id);
       this.initialData._id = new ObjectId(originalData._id);
     }
-  }
-
-  /**
-   * Set the current request object
-   */
-  public setRequest(request: any) {
-    this.request = request;
-
-    return this;
   }
 
   /**
@@ -424,7 +392,7 @@ export class Model extends RelationshipModel {
           await ModelEvents.trigger("saving", this, currentModel);
         }
 
-        await queryBuilder.replace(
+        await this.getQuery().replace(
           this.getCollection(),
           {
             _id: this.data._id,
@@ -453,7 +421,7 @@ export class Model extends RelationshipModel {
 
         const now = new Date();
 
-        const createdAtColumn = this.createdAtColumn as "createdAt";
+        const createdAtColumn = this.createdAtColumn;
 
         // if the column does not exist, then create it
         if (createdAtColumn) {
@@ -461,7 +429,7 @@ export class Model extends RelationshipModel {
         }
 
         // if the column does not exist, then create it
-        const updatedAtColumn = this.updatedAtColumn as "updatedAt";
+        const updatedAtColumn = this.updatedAtColumn;
 
         if (updatedAtColumn) {
           this.data[updatedAtColumn] = now;
@@ -484,7 +452,7 @@ export class Model extends RelationshipModel {
           await ModelEvents.trigger("saving", this);
         }
 
-        this.data = (await queryBuilder.create(
+        this.data = (await this.getQuery().create(
           this.getCollection(),
           this.data,
         )) as Schema;
@@ -652,12 +620,14 @@ export class Model extends RelationshipModel {
 
         if (!Array.isArray(value)) return [];
 
-        return value.map(item => {
-          return {
-            localeCode: item.localeCode,
-            value: item.value,
-          };
-        });
+        return value
+          .filter(value => !Is.empty(value) && Is.plainObject(value))
+          .map(item => {
+            return {
+              localeCode: item.localeCode,
+              value: item.value,
+            };
+          });
       case "number":
         return isEmpty ? 0 : Number(value);
       case "int":
@@ -676,6 +646,8 @@ export class Model extends RelationshipModel {
         return Boolean(value);
       }
       case "date": {
+        if (isEmpty) return null;
+
         if (value instanceof Date) {
           return toUTC(value);
         }
@@ -684,9 +656,17 @@ export class Model extends RelationshipModel {
           return toUTC(value.toDate());
         }
 
-        if (isEmpty) return null;
-
         if (typeof value === "string") {
+          const isZuluTime = (value: string) => {
+            // use regex to check if the string is in zulu time format
+            return value.match(
+              /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}).(\d+)Z$/,
+            );
+          };
+
+          if (isZuluTime(value)) {
+            return toUTC(new Date(value));
+          }
           return toUTC(dayjs(value, this.dateFormat).toDate());
         }
 
@@ -741,8 +721,18 @@ export class Model extends RelationshipModel {
     // if default value is empty, then do nothing
     if (Is.empty(this.defaultValue)) return;
 
+    const defaultValue = { ...this.defaultValue };
+
+    for (const key in defaultValue) {
+      const value = defaultValue[key];
+
+      if (typeof value === "function") {
+        defaultValue[key] = value(this);
+      }
+    }
+
     // merge the data with default value
-    this.data = merge(this.defaultValue, this.data);
+    this.data = merge(defaultValue, this.data);
   }
 
   /**
@@ -755,8 +745,17 @@ export class Model extends RelationshipModel {
       (this.data as any)[this.deletedAtColumn] = new Date();
     }
 
-    if (this.moveToTrash) {
-      queryBuilder.create(this.getCollection() + "Trash", {
+    const deleteStrategy: ModelDeleteStrategy =
+      this.getStaticProperty("deleteStrategy");
+
+    if (deleteStrategy === ModelDeleteStrategy.moveToTrash) {
+      const collectionName = this.getCollection();
+      class Trash extends Model {
+        public static collection = collectionName + "Trash";
+      }
+
+      // we need to wrap the trash collection inside a model class so it get a generated timestamps and id
+      Trash.create({
         document: this.data,
       });
     }
@@ -768,9 +767,20 @@ export class Model extends RelationshipModel {
     await selfModelEvents.trigger("deleting", this);
     await ModelEvents.trigger("deleting", this);
 
-    await queryBuilder.deleteOne(this.getCollection(), {
-      _id: this.data._id,
-    });
+    // the document will be deleted from database collection if the delete strategy is not soft delete
+    if (deleteStrategy !== ModelDeleteStrategy.softDelete) {
+      await this.getQuery().deleteOne(this.getCollection(), {
+        _id: this.data._id,
+      });
+    } else if (deleteStrategy === ModelDeleteStrategy.softDelete) {
+      await this.getQuery().updateOne(
+        this.getCollection(),
+        {
+          _id: this.data._id,
+        },
+        this.data,
+      );
+    }
 
     await selfModelEvents.trigger("deleted", this);
     await ModelEvents.trigger("deleted", this);
@@ -829,7 +839,7 @@ export class Model extends RelationshipModel {
    * Clone the model
    */
   public clone() {
-    return new (this.constructor as any)(clone(this.data));
+    return new (this.constructor as any)(clone(this.data)) as this;
   }
 }
 

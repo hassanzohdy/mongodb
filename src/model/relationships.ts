@@ -30,6 +30,14 @@ export abstract class RelationshipModel extends CrudModel {
   }
 
   /**
+   * Get query builder
+   * @alias aggregate
+   */
+  public static queryBuilder<T>(this: ChildModel<T>) {
+    return new ModelAggregate<T>(this);
+  }
+
+  /**
    * Sync with the given model
    */
   public static sync(columns: string | string[], embedMethod = "embedData") {

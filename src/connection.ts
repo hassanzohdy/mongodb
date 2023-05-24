@@ -1,7 +1,7 @@
 import events from "@mongez/events";
 import { log } from "@mongez/logger";
-import { MongoClient } from "mongodb";
-import { database, Database } from "./database";
+import { MongoClient, MongoClientOptions } from "mongodb";
+import { Database, database } from "./database";
 import { DatabaseConfigurations } from "./types";
 
 export type ConnectionEvent = "connected" | "error" | "close";
@@ -30,14 +30,16 @@ export class Connection {
     port: 27017,
     username: "",
     password: "",
-    name: "mongez",
+    database: "",
     dbAuth: "",
   };
 
   /**
    * Connect to the database
    */
-  public async connect(databaseConfigurations?: DatabaseConfigurations) {
+  public async connect(
+    databaseConfigurations?: DatabaseConfigurations & MongoClientOptions,
+  ) {
     if (this.isConnectionEstablished) return;
 
     if (databaseConfigurations) {
@@ -52,41 +54,49 @@ export class Connection {
       port,
       username,
       password,
-      name,
+      database: databaseName,
       dbAuth,
+      url,
       ...otherConnectionOptions
     } = this.configurations;
 
     try {
       log.info("database", "connection", "Connecting to the database");
-      this.client = await MongoClient.connect(`mongodb://${host}:${port}`, {
-        auth: {
-          username: username,
-          password: password,
-        },
-        // add database authentication here
-        authSource: dbAuth,
-        ...otherConnectionOptions,
-      });
 
-      const mongoDBDatabase = await this.client.db(name);
+      const connectionOptions = otherConnectionOptions;
 
-      this.database = database.setDatabase(mongoDBDatabase);
+      if (dbAuth) {
+        connectionOptions.authSource = dbAuth;
+      }
+
+      if (username && password) {
+        connectionOptions.auth = {
+          username,
+          password,
+        };
+      }
+
+      this.client = await MongoClient.connect(
+        url || `mongodb://${host}:${port}`,
+        connectionOptions,
+      );
+
+      const mongoDBDatabase = await this.client.db(databaseName);
+
+      this.database = database.setDatabase(mongoDBDatabase).setConnection(this);
 
       this.isConnectionEstablished = true;
-
-      this.database.setConnection(this);
 
       // listen on connection close
       this.client.on("close", () => {
         this.trigger("close", this);
       });
 
-      if (!username || !password) {
+      if (!url && (!username || !password)) {
         log.warn(
           "database",
           "connection",
-          "Connected, but you are not making a secure authenticated connection!"
+          "Connected, but you are not making a secure authenticated connection!",
         );
       } else {
         log.success("database", "connection", "Connected to the database");
@@ -119,6 +129,15 @@ export class Connection {
    */
   public on(eventName: ConnectionEvent, callback: any) {
     return events.subscribe(`database.connection.${eventName}`, callback);
+  }
+
+  /**
+   * Use another database
+   */
+  public useDatabase(name: string) {
+    return new Database()
+      .setDatabase((this.client as MongoClient).db(name))
+      .setConnection(this);
   }
 }
 

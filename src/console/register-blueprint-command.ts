@@ -1,7 +1,7 @@
 import Is from "@mongez/supportive-is";
 import { Command } from "commander";
 import { BluePrint } from "./../blueprint";
-import { getBlueprintsList, setMigrationsList } from "./../migrate";
+import { setMigrationsList } from "./../migrate";
 import { connectToDatabase } from "./../utils";
 
 function parseBluePrint(data: any) {
@@ -32,9 +32,5 @@ export function registerBlueprintsCommand(migrationsList: any[]) {
     .action(() => {
       setMigrationsList(migrationsList);
       connectToDatabase();
-
-      console.log(
-        getBlueprintsList().map((blueprint) => parseBluePrint(blueprint.schema))
-      );
     });
 }

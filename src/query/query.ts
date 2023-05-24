@@ -1,8 +1,16 @@
-import { FindCursor, FindOptions } from "mongodb";
+import {
+  AggregateOptions,
+  CountDocumentsOptions,
+  ExplainVerbosityLike,
+  FindCursor,
+  FindOptions,
+  UpdateFilter,
+  UpdateOptions,
+} from "mongodb";
 import { Database, database } from "../database";
 import { Document, Filter, ModelDocument } from "../model/types";
 
-export class QueryBuilder {
+export class Query {
   /**
    * Connection instance
    */
@@ -39,6 +47,20 @@ export class QueryBuilder {
   }
 
   /**
+   * Create many documents in the given collection
+   */
+  public async createMany(collection: string, data: Document[]) {
+    const query = this.query(collection);
+
+    const result = await query.insertMany(data);
+
+    return data.map((data, index) => ({
+      ...data,
+      _id: result.insertedIds[index],
+    }));
+  }
+
+  /**
    * Update model by the given id
    */
   public async update(
@@ -60,6 +82,18 @@ export class QueryBuilder {
     );
 
     return result.ok ? result.value : null;
+  }
+
+  /**
+   * Update many documents
+   */
+  public async updateMany(
+    collection: string,
+    filter: Filter,
+    update: UpdateFilter<Document>,
+    options?: UpdateOptions,
+  ) {
+    return await this.query(collection).updateMany(filter, update, options);
   }
 
   /**
@@ -109,7 +143,10 @@ export class QueryBuilder {
   /**
    * Perform a single delete operation for the given collection
    */
-  public async deleteOne(collection: string, filter: Filter): Promise<boolean> {
+  public async deleteOne(
+    collection: string,
+    filter?: Filter,
+  ): Promise<boolean> {
     const query = this.query(collection);
 
     const result = await query.deleteOne(filter);
@@ -147,11 +184,15 @@ export class QueryBuilder {
   /**
    * Find last document for the given collection with the given filter
    */
-  public async last(collection: string, filter: Filter = {}) {
+  public async last(
+    collection: string,
+    filter: Filter = {},
+    options?: FindOptions,
+  ) {
     const query = this.query(collection);
 
     const results = await query
-      .find(filter)
+      .find(filter, options)
       .sort({
         id: "desc",
       })
@@ -184,11 +225,15 @@ export class QueryBuilder {
   /**
    * Find latest documents for the given collection with the given filter
    */
-  public async latest(collection: string, filter: Filter = {}) {
+  public async latest(
+    collection: string,
+    filter: Filter = {},
+    findOptions?: FindOptions,
+  ) {
     const query = this.query(collection);
 
     return await query
-      .find(filter)
+      .find(filter, findOptions)
       .sort({
         id: "desc",
       })
@@ -211,20 +256,41 @@ export class QueryBuilder {
   /**
    * Count documents for the given collection with the given filter
    */
-  public async count(collection: string, filter: Filter = {}) {
-    return await this.query(collection).countDocuments(filter);
+  public async count(
+    collection: string,
+    filter: Filter = {},
+    options?: CountDocumentsOptions,
+  ) {
+    return await this.query(collection).countDocuments(filter, options);
   }
 
   /**
    * Create an explain fetch query
    */
-  public async explain(collection: string, filter: Filter = {}) {
+  public async explain(
+    collection: string,
+    filter: Filter = {},
+    findOptions?: FindOptions,
+    verbosity?: ExplainVerbosityLike,
+  ) {
     return await this.query(collection)
       .find(filter, {
+        ...(findOptions || {}),
         explain: true,
       })
-      .explain();
+      .explain(verbosity);
+  }
+
+  /**
+   * Create aggregate query
+   */
+  public async aggregate(
+    collection: string,
+    pipeline: Document[],
+    options?: AggregateOptions,
+  ) {
+    return this.query(collection).aggregate(pipeline, options);
   }
 }
 
-export const queryBuilder = new QueryBuilder();
+export const query = new Query();

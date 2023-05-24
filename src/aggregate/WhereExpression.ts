@@ -63,7 +63,7 @@ export class WhereExpression {
 
     if (operator === "like") {
       // escape the value special characters
-      value = value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+      value = String(value).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
       value = new RegExp(value, "i");
     } else if (operator === "notLike") {
       // escape the value special characters

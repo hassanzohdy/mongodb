@@ -1,4 +1,4 @@
-import { Db } from "mongodb";
+import { Collection, Db } from "mongodb";
 import { Connection } from "./connection";
 
 export class Database {
@@ -33,7 +33,7 @@ export class Database {
   /**
    * Get database collection instance
    */
-  public collection(collection: string) {
+  public collection(collection: string): Collection {
     return this.database.collection(collection);
   }
 
