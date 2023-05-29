@@ -12,3 +12,7 @@ export class SortRandomPipeline extends Pipeline {
     });
   }
 }
+
+export function sortRandomPipeline(size: number) {
+  return new SortRandomPipeline(size);
+}

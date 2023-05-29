@@ -7,7 +7,7 @@ export class UnwindPipeline extends Pipeline {
    */
   public constructor(
     protected readonly column: string,
-    protected readonly preserveNullAndEmptyArrays: boolean = false
+    protected readonly preserveNullAndEmptyArrays = false,
   ) {
     super("unwind");
 
@@ -16,4 +16,11 @@ export class UnwindPipeline extends Pipeline {
       preserveNullAndEmptyArrays: preserveNullAndEmptyArrays,
     });
   }
+}
+
+export function unwindPipeline(
+  column: string,
+  preserveNullAndEmptyArrays = false,
+) {
+  return new UnwindPipeline(column, preserveNullAndEmptyArrays);
 }

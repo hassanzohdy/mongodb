@@ -1,3 +1,4 @@
+import Is from "@mongez/supportive-is";
 import { Model } from "../model";
 
 export function castModel(
@@ -18,13 +19,15 @@ export function castModel(
         )
         .get();
 
-      return records.map(record => {
-        if (Array.isArray(embeddedKey)) {
-          return record.only(embeddedKey);
-        }
+      return records
+        .map(record => {
+          if (Array.isArray(embeddedKey)) {
+            return record.only(embeddedKey);
+          }
 
-        return (record as any)[embeddedKey];
-      });
+          return (record as any)[embeddedKey];
+        })
+        .filter(value => !Is.empty(value));
     }
 
     if (value?.id) return value;

@@ -6,7 +6,7 @@ export class SortPipeline extends Pipeline {
    */
   public constructor(
     protected readonly column: string,
-    protected readonly direction: "asc" | "desc" = "asc"
+    protected readonly direction: "asc" | "desc" = "asc",
   ) {
     super("sort");
 
@@ -14,4 +14,11 @@ export class SortPipeline extends Pipeline {
       [column]: direction === "asc" ? 1 : -1,
     });
   }
+}
+
+export function sortPipeline(
+  column: string,
+  direction: "asc" | "desc" = "asc",
+) {
+  return new SortPipeline(column, direction);
 }

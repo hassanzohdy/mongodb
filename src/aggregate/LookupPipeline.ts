@@ -30,3 +30,7 @@ export class LookupPipeline extends Pipeline {
     });
   }
 }
+
+export function lookupPipeline(options: LookupPipelineOptions) {
+  return new LookupPipeline(options);
+}

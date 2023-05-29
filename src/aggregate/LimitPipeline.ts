@@ -10,3 +10,7 @@ export class LimitPipeline extends Pipeline {
     this.data(limit);
   }
 }
+
+export function limitPipeline(limit: number) {
+  return new LimitPipeline(limit);
+}

@@ -1,6 +1,6 @@
 import { toStudlyCase } from "@mongez/reinforcements";
 import { Aggregate } from "../aggregate";
-import { select } from "../aggregate/SelectPipeline";
+import { selectPipeline } from "../aggregate/SelectPipeline";
 import { Filter, PaginationListing } from "./types";
 
 export class ModelAggregate<T> extends Aggregate {
@@ -81,7 +81,7 @@ export class ModelAggregate<T> extends Aggregate {
     } = relation.call(this.model, ...moreParams);
 
     if (selectColumns) {
-      pipeline.push(select(selectColumns));
+      pipeline.push(selectPipeline(selectColumns));
     }
 
     this.lookup({

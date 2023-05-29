@@ -1,3 +1,4 @@
+import { ltrim } from "@mongez/reinforcements";
 import Is from "@mongez/supportive-is";
 import { toUTC } from "@mongez/time-wizard";
 import { Filter } from "../model";
@@ -99,7 +100,17 @@ export class WhereExpression {
       });
     }
 
-    if (operator === "between") {
+    if (operator === "in" && typeof value === "string") {
+      expression = {
+        $in: "$" + ltrim(value, "$"),
+      };
+    } else if (operator === "notIn" && typeof value === "string") {
+      expression = {
+        $not: {
+          $in: "$" + ltrim(value, "$"),
+        },
+      };
+    } else if (operator === "between") {
       expression = {
         $gte: value[0],
         $lte: value[1],

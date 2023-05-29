@@ -7,7 +7,7 @@ export class GroupByPipeline extends Pipeline {
    */
   public constructor(
     protected readonly _id: string | null | GenericObject,
-    protected groupByData: GenericObject = {}
+    protected groupByData: GenericObject = {},
   ) {
     super("group");
 
@@ -22,9 +22,9 @@ export class GroupByPipeline extends Pipeline {
   }
 }
 
-export function groupBy(
+export function groupByPipeline(
   column: string | null | GenericObject,
-  groupByData: Record<string, any>
+  groupByData: Record<string, any>,
 ) {
   return new GroupByPipeline(column, groupByData);
 }

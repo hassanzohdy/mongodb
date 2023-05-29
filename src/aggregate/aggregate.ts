@@ -416,15 +416,17 @@ export class Aggregate {
 
   /**
    * Where in operator
+   * If value is a string, it will be treated as a column name
    */
-  public whereIn(column: string, values: any[]) {
+  public whereIn(column: string, values: string | any[]) {
     return this.where(column, "in", values);
   }
 
   /**
    * Where not in operator
+   * If value is a string, it will be treated as a column name
    */
-  public whereNotIn(column: string, values: any[]) {
+  public whereNotIn(column: string, values: string | any[]) {
     return this.where(column, "notIn", values);
   }
 

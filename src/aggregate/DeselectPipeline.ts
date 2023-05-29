@@ -12,7 +12,11 @@ export class DeselectPipeline extends Pipeline {
         acc[column] = 0;
 
         return acc;
-      }, {})
+      }, {}),
     );
   }
+}
+
+export function deselectPipeline(columns: string[]) {
+  return new DeselectPipeline(columns);
 }

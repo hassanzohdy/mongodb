@@ -1,3 +1,4 @@
+import { WhereExpression } from "./WhereExpression";
 import { WherePipeline } from "./WherePipeline";
 
 export class OrWherePipeline extends WherePipeline {
@@ -21,4 +22,15 @@ export class OrWherePipeline extends WherePipeline {
       },
     };
   }
+}
+
+export function orWherePipeline(column: string, value: any): OrWherePipeline;
+export function orWherePipeline(
+  column: string,
+  operator: string,
+  value: any,
+): OrWherePipeline;
+export function orWherePipeline(column: any): OrWherePipeline;
+export function orWherePipeline(...args: any[]) {
+  return new OrWherePipeline(WhereExpression.parse.apply(null, args as any));
 }

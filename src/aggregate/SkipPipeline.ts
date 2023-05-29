@@ -10,3 +10,7 @@ export class SkipPipeline extends Pipeline {
     this.data(skip);
   }
 }
+
+export function skipPipeline(skip: number) {
+  return new SkipPipeline(skip);
+}

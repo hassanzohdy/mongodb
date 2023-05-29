@@ -5,7 +5,7 @@ export class SortByPipeline extends Pipeline {
    * Constructor
    */
   public constructor(
-    protected readonly columns: Record<string, "desc" | "asc">
+    protected readonly columns: Record<string, "desc" | "asc">,
   ) {
     super("sort");
 
@@ -17,4 +17,8 @@ export class SortByPipeline extends Pipeline {
 
     this.data(data);
   }
+}
+
+export function sortByPipeline(columns: Record<string, "desc" | "asc">) {
+  return new SortByPipeline(columns);
 }

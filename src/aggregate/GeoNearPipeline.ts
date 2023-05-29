@@ -9,7 +9,7 @@ export class GeoNearPipeline extends Pipeline {
     protected readonly column: string,
     protected readonly location: GeoLocation,
     protected readonly maxDistance?: number,
-    protected readonly minDistance?: number
+    protected readonly minDistance?: number,
   ) {
     super("geoNear");
   }
@@ -40,4 +40,13 @@ export class GeoNearPipeline extends Pipeline {
   public sortOrder() {
     return -1;
   }
+}
+
+export function geoNearPipeline(
+  column: string,
+  location: GeoLocation,
+  maxDistance?: number,
+  minDistance?: number,
+) {
+  return new GeoNearPipeline(column, location, maxDistance, minDistance);
 }
