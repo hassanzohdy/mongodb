@@ -1,4 +1,5 @@
-import { GenericObject, ltrim } from "@mongez/reinforcements";
+import { GenericObject } from "@mongez/reinforcements";
+import { $agg } from "./expressions";
 import { Pipeline } from "./pipeline";
 
 export class GroupByPipeline extends Pipeline {
@@ -6,13 +7,21 @@ export class GroupByPipeline extends Pipeline {
    * Constructor
    */
   public constructor(
-    protected readonly _id: string | null | GenericObject,
+    protected readonly _id: string | null | GenericObject | string[],
     protected groupByData: GenericObject = {},
   ) {
     super("group");
 
     if (typeof _id === "string") {
-      _id = "$" + ltrim(_id, "$");
+      _id = $agg.columnName(_id);
+    }
+
+    if (Array.isArray(_id)) {
+      _id = (_id as string[]).reduce((result, column) => {
+        result[column] = $agg.columnName(column);
+
+        return result;
+      }, {} as any);
     }
 
     this.data({

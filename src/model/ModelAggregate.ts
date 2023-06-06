@@ -15,17 +15,17 @@ export class ModelAggregate<T> extends Aggregate {
   /**
    * {@inheritDoc}
    */
-  public async get(
+  public async get<Output = T>(
     mapData: (record: any) => any = record => new this.model(record),
   ) {
-    return (await super.get(mapData)) as T[];
+    return (await super.get(mapData)) as Output[];
   }
 
   /**
    * {@inheritDoc}
    */
-  public async first(filters?: Filter) {
-    return (await super.first(filters)) as T | undefined;
+  public async first(mapData?: (data: any) => any) {
+    return (await super.first(mapData)) as T | undefined;
   }
 
   /**

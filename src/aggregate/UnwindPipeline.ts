@@ -1,5 +1,10 @@
-import { ltrim } from "@mongez/reinforcements";
+import { $agg } from "./expressions";
 import { Pipeline } from "./pipeline";
+
+export type UnwindOptions = {
+  preserveNullAndEmptyArrays?: boolean;
+  includeArrayIndex?: string | null;
+};
 
 export class UnwindPipeline extends Pipeline {
   /**
@@ -7,20 +12,21 @@ export class UnwindPipeline extends Pipeline {
    */
   public constructor(
     protected readonly column: string,
-    protected readonly preserveNullAndEmptyArrays = false,
+    options: UnwindOptions = {},
   ) {
     super("unwind");
 
+    const { preserveNullAndEmptyArrays = false, includeArrayIndex = null } =
+      options;
+
     this.data({
-      path: "$" + ltrim(column, "$"),
-      preserveNullAndEmptyArrays: preserveNullAndEmptyArrays,
+      path: $agg.columnName(column),
+      preserveNullAndEmptyArrays,
+      includeArrayIndex,
     });
   }
 }
 
-export function unwindPipeline(
-  column: string,
-  preserveNullAndEmptyArrays = false,
-) {
-  return new UnwindPipeline(column, preserveNullAndEmptyArrays);
+export function unwindPipeline(column: string, options?: UnwindOptions) {
+  return new UnwindPipeline(column, options);
 }

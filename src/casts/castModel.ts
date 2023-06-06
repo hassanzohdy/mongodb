@@ -7,9 +7,16 @@ export function castModel(
 ) {
   return async function injectEmbeddedData(value: any) {
     if (Array.isArray(value)) {
-      if (value[0]?.id) {
-        return value;
+      const results: any[] = [];
+      for (const item of value) {
+        if (value instanceof Model) {
+          results.push(getModelData(item, embeddedKey));
+        } else if (item?.id) {
+          results.push(item);
+        }
       }
+
+      if (results.length > 0) return results;
 
       const records: Model[] = await model
         .aggregate()
@@ -21,26 +28,27 @@ export function castModel(
 
       return records
         .map(record => {
-          if (Array.isArray(embeddedKey)) {
-            return record.only(embeddedKey);
-          }
-
-          return (record as any)[embeddedKey];
+          return getModelData(record, embeddedKey);
         })
         .filter(value => !Is.empty(value));
     }
 
+    if (value instanceof Model) return getModelData(value, embeddedKey);
+
     if (value?.id) return value;
 
-    const record: any =
-      value instanceof Model ? value : await model.find(Number(value));
+    const record: any = await model.find(Number(value));
 
     if (!record) return null;
 
-    if (Array.isArray(embeddedKey)) {
-      return record.only(embeddedKey);
-    }
-
-    return record[embeddedKey];
+    return getModelData(record, embeddedKey);
   };
+}
+
+function getModelData(model: Model, embeddedKey: string | string[]) {
+  if (Array.isArray(embeddedKey)) {
+    return model.only(embeddedKey);
+  }
+
+  return (model as any)[embeddedKey];
 }

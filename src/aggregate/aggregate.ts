@@ -14,11 +14,18 @@ import { SkipPipeline } from "./SkipPipeline";
 import { SortByPipeline } from "./SortByPipeline";
 import { SortPipeline } from "./SortPipeline";
 import { SortRandomPipeline } from "./SortRandomPipeline";
-import { UnwindPipeline } from "./UnwindPipeline";
+import { UnwindOptions, UnwindPipeline } from "./UnwindPipeline";
 import { WhereExpression } from "./WhereExpression";
-import { WhereExpressionPipeline } from "./WhereExpressionPipeline";
 import { WherePipeline } from "./WherePipeline";
-import { addToSet, count, dayOfMonth, last, month, year } from "./expressions";
+import {
+  $agg,
+  addToSet,
+  count,
+  dayOfMonth,
+  last,
+  month,
+  year,
+} from "./expressions";
 import { parsePipelines } from "./parsePipelines";
 import { Pipeline } from "./pipeline";
 import { WhereOperator } from "./types";
@@ -75,15 +82,15 @@ export class Aggregate {
   /**
    * Order by descending
    */
-  public orderByDesc(column: string) {
+  public sortByDesc(column: string) {
     return this.sort(column, "desc");
   }
 
   /**
-   * Order by latest created records
+   * Order by descending
    */
-  public latest() {
-    return this.orderByDesc("createdAt");
+  public orderByDesc(column: string) {
+    return this.sort(column, "desc");
   }
 
   /**
@@ -119,6 +126,20 @@ export class Aggregate {
   }
 
   /**
+   * Order by latest created records
+   */
+  public latest(column = "createdAt") {
+    return this.sort(column, "desc");
+  }
+
+  /**
+   * Order by oldest created records
+   */
+  public oldest(column = "createdAt") {
+    return this.sort(column, "asc");
+  }
+
+  /**
    * Group by aggregate
    */
   public groupBy(GroupByPipeline: GroupByPipeline): this;
@@ -126,6 +147,7 @@ export class Aggregate {
     GroupByPipeline: GenericObject,
     groupByData?: GenericObject,
   ): this;
+  public groupBy(groupByColumns: string[], groupByData?: GenericObject): this;
   public groupBy(groupBy_id: string | null): this;
   public groupBy(groupBy_id: string | null, groupByData: GenericObject): this;
   public groupBy(...args: any[]) {
@@ -144,7 +166,7 @@ export class Aggregate {
   public groupByYear(column: string, groupByData?: GenericObject) {
     return this.groupBy(
       {
-        year: year(column),
+        year: year($agg.columnName(column)),
       },
       groupByData,
     );
@@ -154,6 +176,7 @@ export class Aggregate {
    * Group by month and year
    */
   public groupByMonthAndYear(column: string, groupByData?: GenericObject) {
+    column = $agg.columnName(column);
     return this.groupBy(
       {
         year: year(column),
@@ -167,6 +190,7 @@ export class Aggregate {
    * Group by month only
    */
   public groupByMonth(column: string, groupByData?: GenericObject) {
+    column = $agg.columnName(column);
     return this.groupBy(
       {
         month: month(column),
@@ -179,6 +203,7 @@ export class Aggregate {
    * Group by day, month and year
    */
   public groupByDate(column: string, groupByData?: GenericObject) {
+    column = $agg.columnName(column);
     return this.groupBy(
       {
         year: year(column),
@@ -193,6 +218,7 @@ export class Aggregate {
    * Group by day only
    */
   public groupByDayOfMonth(column: string, groupByData?: GenericObject) {
+    column = $agg.columnName(column);
     return this.groupBy(
       {
         day: dayOfMonth(column),
@@ -209,6 +235,57 @@ export class Aggregate {
   }
 
   /**
+   * Get average of the given column
+   */
+  public async avg(column: string) {
+    const document = await this.groupBy(null, {
+      avg: $agg.avg(column),
+    }).first(document => document);
+
+    return document?.avg || 0;
+  }
+
+  /**
+   * {@alias} avg
+   */
+  public average(column: string) {
+    return this.avg(column);
+  }
+
+  /**
+   * Sum values of the given column
+   */
+  public async sum(column: string) {
+    const document = await this.groupBy(null, {
+      sum: $agg.sum(column),
+    }).first(document => document);
+
+    return document?.sum || 0;
+  }
+
+  /**
+   * Get minimum value of the given column
+   */
+  public async min(column: string) {
+    const document = await this.groupBy(null, {
+      min: $agg.min(column),
+    }).first(document => document);
+
+    return document?.min || 0;
+  }
+
+  /**
+   * Get maximum value of the given column
+   */
+  public async max(column: string) {
+    const document = await this.groupBy(null, {
+      max: $agg.max(column),
+    }).first(document => document);
+
+    return document?.max || 0;
+  }
+
+  /**
    * Get distinct value for the given column using aggregation
    */
   public async distinct(column: string) {
@@ -218,10 +295,24 @@ export class Aggregate {
   }
 
   /**
+   * {@alias} distinct
+   */
+  public unique(column: string) {
+    return this.distinct(column);
+  }
+
+  /**
    * Get distinct values that are not empty
    */
   public async distinctHeavy(column: string) {
     return await this.whereNotNull(column).distinct(column);
+  }
+
+  /**
+   * {@alias} distinctHeavy
+   */
+  public async uniqueHeavy(column: string) {
+    return await this.distinctHeavy(column);
   }
 
   /**
@@ -255,12 +346,12 @@ export class Aggregate {
   /**
    * Unwind/Extract the given column
    */
-  public unwind(column: string) {
-    return this.pipeline(new UnwindPipeline(column));
+  public unwind(column: string, options?: UnwindOptions) {
+    return this.pipeline(new UnwindPipeline(column, options));
   }
 
   /**
-   * Add where pipeline
+   * Add where stage
    */
   public where(column: string, value: any): this;
   public where(column: string, operator: WhereOperator, value: any): this;
@@ -272,7 +363,7 @@ export class Aggregate {
   }
 
   /**
-   * Or Where pipeline
+   * Or Where stage
    */
   public orWhere(column: GenericObject) {
     return this.pipeline(new OrWherePipeline(column));
@@ -283,13 +374,6 @@ export class Aggregate {
    */
   public whereNull(column: string) {
     return this.where(column, null);
-  }
-
-  /**
-   * Where using expression
-   */
-  public whereExpression(column: string, expression: any) {
-    return this.pipeline(new WhereExpressionPipeline(column, expression));
   }
 
   /**
@@ -342,16 +426,10 @@ export class Aggregate {
   }
 
   /**
-   * Delete records
+   * Where date not between operator
    */
-  public async delete() {
-    const ids = await (
-      await this.select(["_id"]).pluck("_id")
-    ).map(_id => new ObjectId(_id));
-
-    return await query.delete(this.collection, {
-      _id: ids,
-    });
+  public whereDateNotBetween(column: string, value: [Date, Date]) {
+    return this.where(column, "notBetween", value);
   }
 
   /**
@@ -389,7 +467,7 @@ export class Aggregate {
     const [column, operator, columnSize] = args;
     this.project({
       [column + "_size"]: {
-        $size: "$" + column,
+        $size: $agg.columnName(column),
       },
     });
 
@@ -479,7 +557,7 @@ export class Aggregate {
   }
 
   /**
-   * Add mongodb plain pipeline
+   * Add mongodb plain stage
    */
   public addPipeline(pipeline: any) {
     this.pipelines.push(pipeline);
@@ -488,7 +566,7 @@ export class Aggregate {
   }
 
   /**
-   * Add mongodb plain pipelines
+   * Add mongodb plain stages
    */
   public addPipelines(pipelines: any[]) {
     this.pipelines.push(...pipelines);
@@ -499,12 +577,8 @@ export class Aggregate {
   /**
    * Get only first result
    */
-  public async first(filters?: Filter): Promise<any> {
-    if (filters) {
-      this.where(filters);
-    }
-
-    const results = await this.limit(1).get();
+  public async first(mapData?: (data: any) => any): Promise<any> {
+    const results = await this.limit(1).get(mapData);
 
     return results[0];
   }
@@ -523,23 +597,25 @@ export class Aggregate {
   }
 
   /**
+   * Delete records
+   */
+  public async delete() {
+    const ids = await (
+      await this.select(["_id"]).pluck("_id")
+    ).map(_id => new ObjectId(_id));
+
+    return await query.delete(this.collection, {
+      _id: ids,
+    });
+  }
+
+  /**
    * Get the data
    */
   public async get(mapData?: (data: any) => any): Promise<any[]> {
     const records = await this.execute();
 
     return mapData ? records.map(mapData) : records;
-  }
-
-  /**
-   * Explain the query
-   */
-  public async explain() {
-    return (
-      await this.query.aggregate(this.collection, this.parse(), {
-        explain: true,
-      })
-    ).explain();
   }
 
   /**
@@ -571,6 +647,17 @@ export class Aggregate {
     };
 
     return result;
+  }
+
+  /**
+   * Explain the query
+   */
+  public async explain() {
+    return (
+      await this.query.aggregate(this.collection, this.parse(), {
+        explain: true,
+      })
+    ).explain();
   }
 
   /**

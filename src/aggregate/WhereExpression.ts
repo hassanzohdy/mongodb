@@ -1,8 +1,21 @@
-import { ltrim } from "@mongez/reinforcements";
 import Is from "@mongez/supportive-is";
 import { toUTC } from "@mongez/time-wizard";
 import { Filter } from "../model";
+import { $agg } from "./expressions";
 import { MongoDBOperator, WhereOperator } from "./types";
+
+function escapeRegex(value: string | RegExp, escapeOnly = false) {
+  if (value instanceof RegExp === false) {
+    // escape the value special characters
+    value = String(value).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+
+    if (escapeOnly === false) {
+      value = new RegExp(value, "i");
+    }
+  }
+
+  return value;
+}
 
 export class WhereExpression {
   /**
@@ -63,25 +76,19 @@ export class WhereExpression {
     }
 
     if (operator === "like") {
-      // escape the value special characters
-      value = String(value).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-      value = new RegExp(value, "i");
+      value = escapeRegex(value);
     } else if (operator === "notLike") {
-      // escape the value special characters
-      value = value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-      value = new RegExp(value, "i");
+      value = escapeRegex(value);
       operator = "not";
       value = {
         $regex: value,
       };
     } else if (operator === "startsWith") {
-      // escape the value special characters
-      value = value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-      value = new RegExp(`^${value}`, "i");
+      value = escapeRegex(value, true);
+      value = new RegExp(`^${value}`);
     } else if (operator === "endsWith") {
-      // escape the value special characters
-      value = value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
-      value = new RegExp(`${value}$`, "i");
+      value = escapeRegex(value, true);
+      value = new RegExp(`${value}$`);
     }
 
     let expression = {
@@ -102,12 +109,12 @@ export class WhereExpression {
 
     if (operator === "in" && typeof value === "string") {
       expression = {
-        $in: "$" + ltrim(value, "$"),
+        $in: $agg.columnName(value),
       };
     } else if (operator === "notIn" && typeof value === "string") {
       expression = {
         $not: {
-          $in: "$" + ltrim(value, "$"),
+          $in: $agg.columnName(value),
         },
       };
     } else if (operator === "between") {

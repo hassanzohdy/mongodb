@@ -4,19 +4,40 @@ import Is from "@mongez/supportive-is";
 /**
  * Get count expression
  */
-export function count() {
-  return {
-    $sum: 1,
-  };
+export function count(column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $sum: 1,
+    },
+    column,
+  );
+}
+
+/**
+ * Parse the given column
+ */
+export const columnName = (column: string) => `$${ltrim(column, "$")}`;
+
+function wrapExpressionWithColumn(expression: any, column?: string) {
+  if (column) {
+    return {
+      [columnName(column)]: expression,
+    };
+  }
+
+  return expression;
 }
 
 /**
  * Get sum expression
  */
-export function sum(column: string) {
-  return {
-    $sum: `$${column}`,
-  };
+export function sum(column: string, baseColumn?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $sum: columnName(column),
+    },
+    baseColumn,
+  );
 }
 
 /**
@@ -25,7 +46,7 @@ export function sum(column: string) {
 export const average = avg;
 export function avg(column: string) {
   return {
-    $avg: `$${column}`,
+    $avg: columnName(column),
   };
 }
 
@@ -34,7 +55,7 @@ export function avg(column: string) {
  */
 export function min(column: string) {
   return {
-    $min: `$${column}`,
+    $min: columnName(column),
   };
 }
 
@@ -43,7 +64,7 @@ export function min(column: string) {
  */
 export function max(column: string) {
   return {
-    $max: `$${column}`,
+    $max: columnName(column),
   };
 }
 
@@ -52,7 +73,7 @@ export function max(column: string) {
  */
 export function first(column: string) {
   return {
-    $first: `$${column}`,
+    $first: columnName(column),
   };
 }
 
@@ -61,7 +82,7 @@ export function first(column: string) {
  */
 export function last(column: string) {
   return {
-    $last: `$${column}`,
+    $last: columnName(column),
   };
 }
 
@@ -70,7 +91,7 @@ export function last(column: string) {
  */
 export function push(data: any) {
   if (typeof data === "string") {
-    data = "$" + ltrim(data, "$");
+    data = columnName(data);
   }
 
   return {
@@ -83,7 +104,7 @@ export function push(data: any) {
  */
 export function addToSet(column: string) {
   return {
-    $addToSet: `$${column}`,
+    $addToSet: columnName(column),
   };
 }
 
@@ -92,7 +113,7 @@ export function addToSet(column: string) {
  */
 export function year(column: string) {
   return {
-    $year: `$${column}`,
+    $year: columnName(column),
   };
 }
 
@@ -102,7 +123,7 @@ export function year(column: string) {
 export function firstYear(column: string) {
   return {
     $first: {
-      $year: `$${column}`,
+      $year: columnName(column),
     },
   };
 }
@@ -113,7 +134,7 @@ export function firstYear(column: string) {
 export function lastYear(column: string) {
   return {
     $last: {
-      $year: `$${column}`,
+      $year: columnName(column),
     },
   };
 }
@@ -123,7 +144,7 @@ export function lastYear(column: string) {
  */
 export function month(column: string) {
   return {
-    $month: `$${column}`,
+    $month: columnName(column),
   };
 }
 
@@ -133,7 +154,7 @@ export function month(column: string) {
 export function firstMonth(column: string) {
   return {
     $first: {
-      $month: `$${column}`,
+      $month: columnName(column),
     },
   };
 }
@@ -144,7 +165,7 @@ export function firstMonth(column: string) {
 export function lastMonth(column: string) {
   return {
     $last: {
-      $month: `$${column}`,
+      $month: columnName(column),
     },
   };
 }
@@ -154,7 +175,7 @@ export function lastMonth(column: string) {
  */
 export function dayOfMonth(column: string) {
   return {
-    $dayOfMonth: `$${column}`,
+    $dayOfMonth: columnName(column),
   };
 }
 
@@ -164,7 +185,7 @@ export function dayOfMonth(column: string) {
 export function firstDayOfMonth(column: string) {
   return {
     $first: {
-      $dayOfMonth: `$${column}`,
+      $dayOfMonth: columnName(column),
     },
   };
 }
@@ -175,7 +196,7 @@ export function firstDayOfMonth(column: string) {
 export function lastDayOfMonth(column: string) {
   return {
     $last: {
-      $dayOfMonth: `$${column}`,
+      $dayOfMonth: columnName(column),
     },
   };
 }
@@ -185,7 +206,7 @@ export function lastDayOfMonth(column: string) {
  */
 export function dayOfWeek(column: string) {
   return {
-    $dayOfWeek: `$${column}`,
+    $dayOfWeek: columnName(column),
   };
 }
 
@@ -194,7 +215,7 @@ export function dayOfWeek(column: string) {
  */
 export function columns(...columns: string[]) {
   return columns.reduce((selections: GenericObject, column) => {
-    selections[column] = `$${column}`;
+    selections[column] = columnName(column);
 
     return selections;
   }, {});
@@ -206,40 +227,52 @@ export function columns(...columns: string[]) {
  * Get greater than expression
  */
 export const greaterThan = gt;
-export function gt(value: any) {
-  return {
-    $gt: value,
-  };
+export function gt(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $gt: value,
+    },
+    column,
+  );
 }
 
 /**
  * Get greater than or equal expression
  */
 export const greaterThanOrEqual = gt;
-export function gte(value: any) {
-  return {
-    $gte: value,
-  };
+export function gte(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $gte: value,
+    },
+    column,
+  );
 }
 
 /**
  * Get less than expression
  */
 export const lessThan = lt;
-export function lt(value: any) {
-  return {
-    $lt: value,
-  };
+export function lt(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $lt: value,
+    },
+    column,
+  );
 }
 
 /**
  * Get less than or equal expression
  */
 export const lessThanOrEqual = lt;
-export function lte(value: any) {
-  return {
-    $lte: value,
-  };
+export function lte(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $lte: value,
+    },
+    column,
+  );
 }
 
 /**
@@ -285,89 +318,111 @@ export function nin(value: any) {
 /**
  * Get exists expression
  */
-export function exists(value: any) {
-  return {
-    $exists: value,
-  };
+export function exists(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $exists: value,
+    },
+    column,
+  );
 }
 
 /**
  * Get not exists expression
  */
-export function notExists(value: any) {
-  return {
-    $not: {
+export function notExists(value: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
       $exists: value,
     },
-  };
+    column,
+  );
 }
 
 /**
  * Get like expression
  */
-export function like(value: any) {
+export function like(value: any, column?: string) {
   if (Is.scalar(value)) {
     value = new RegExp(value, "i");
   }
 
-  return {
-    $regex: value,
-  };
+  return wrapExpressionWithColumn(
+    {
+      $regex: value,
+    },
+    column,
+  );
 }
 
 /**
  * Get not like expression
  */
-export function notLike(value: any) {
+export function notLike(value: any, column?: string) {
   if (Is.scalar(value)) {
     value = new RegExp(value, "i");
   }
 
-  return {
-    $not: {
-      $regex: value,
+  return wrapExpressionWithColumn(
+    {
+      $not: {
+        $regex: value,
+      },
     },
-  };
+    column,
+  );
 }
 
 /**
  * Get not null expression
  */
-export function notNull() {
-  return {
-    $ne: null,
-  };
+export function notNull(column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $ne: null,
+    },
+    column,
+  );
 }
 
 /**
  * Get null expression
  */
-export function isNull() {
-  return {
-    $eq: null,
-  };
+export function isNull(column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $eq: null,
+    },
+    column,
+  );
 }
 
 /**
  * Get between expression
  */
-export function between(minValue: any, maxValue: any) {
-  return {
-    $gte: minValue,
-    $lte: maxValue,
-  };
+export function between(minValue: any, maxValue: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $gte: minValue,
+      $lte: maxValue,
+    },
+    column,
+  );
 }
 
 /**
  * Get not between expression
  */
-export function notBetween(minValue: any, maxValue: any) {
-  return {
-    $not: {
-      $gte: minValue,
-      $lte: maxValue,
+export function notBetween(minValue: any, maxValue: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $not: {
+        $gte: minValue,
+        $lte: maxValue,
+      },
     },
-  };
+    column,
+  );
 }
 
 /**
@@ -375,60 +430,125 @@ export function notBetween(minValue: any, maxValue: any) {
  */
 export function concat(...columns: string[]) {
   return {
-    $concat: columns.map(column => "$" + ltrim(column, "$")),
+    $concat: columns,
   };
 }
 
+export const merge = concat;
+
 /**
- * Concat columns with separator
+ * Concat columns with separator between each column
  */
 export function concatWith(separator: string, ...columns: string[]) {
+  const columnsList = [];
+
+  for (const column of columns) {
+    columnsList.push(columnName(column), separator);
+  }
+
   return {
-    $concat: [separator, ...columns.map(column => "$" + ltrim(column, "$"))],
+    $concat: columnsList,
   };
 }
+
+export const mergeWith = concatWith;
 
 /**
  * Get cond expression
  */
-export function cond(condition: any, ifTrue: any, ifFalse: any) {
-  return {
-    $cond: {
-      if: condition,
-      then: ifTrue,
-      else: ifFalse,
+export function cond(
+  condition: any,
+  ifTrue: any,
+  ifFalse: any,
+  column?: string,
+) {
+  return wrapExpressionWithColumn(
+    {
+      $cond: {
+        if: condition,
+        then: ifTrue,
+        else: ifFalse,
+      },
     },
-  };
+    column,
+  );
 }
+
+export const condition = cond;
 
 /**
  * Boolean condition
  */
-export function booleanCond(condition: any) {
-  return {
-    $cond: {
-      if: condition,
-      then: true,
-      else: false,
-    }
-  }
+export function booleanCond(condition: any, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $cond: {
+        if: condition,
+        then: true,
+        else: false,
+      },
+    },
+    column,
+  );
 }
 
 /**
  * Get regex expression
  */
-export function regex(value: RegExp) {
-  return {
-    $regex: value,
-  };
+export function regex(value: RegExp, column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $regex: value,
+    },
+    column,
+  );
 }
 
 /**
  * You can use it when you want a field to match all the given values
  */
-export function all(values: any[]) {
+export function all(values: any[], column?: string) {
+  return wrapExpressionWithColumn(
+    {
+      $all: values,
+    },
+    column,
+  );
+}
+
+/**
+ * Multiple expressions
+ */
+export function _multiply(...expressions: any[]) {
   return {
-    $all: values,
+    $multiply: expressions,
+  };
+}
+
+/**
+ * Multiple columns
+ */
+export function multiply(...columns: string[]) {
+  return {
+    $multiply: columns.map(columnName),
+  };
+}
+
+/**
+ * Divide expressions
+ */
+export function _divide(...expressions: any[]) {
+  return {
+    $divide: expressions,
+  };
+}
+
+/**
+ * Divide columns
+ */
+export function divide(...columns: string[]) {
+  return {
+    $divide: columns.map(columnName),
   };
 }
 
@@ -437,6 +557,10 @@ export const $agg = {
   count,
   sum,
   avg,
+  multiply: multiply,
+  divide: divide,
+  _divide,
+  _multiply,
   average,
   min,
   max,
@@ -481,8 +605,11 @@ export const $agg = {
   between,
   notBetween,
   concat,
+  merge,
   concatWith,
-  cond,
+  mergeWith,
+  columnName,
   booleanCond,
+  cond,
   regex,
 };
