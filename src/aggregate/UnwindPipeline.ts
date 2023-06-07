@@ -3,7 +3,7 @@ import { Pipeline } from "./pipeline";
 
 export type UnwindOptions = {
   preserveNullAndEmptyArrays?: boolean;
-  includeArrayIndex?: string | null;
+  includeArrayIndex?: string;
 };
 
 export class UnwindPipeline extends Pipeline {
@@ -16,7 +16,7 @@ export class UnwindPipeline extends Pipeline {
   ) {
     super("unwind");
 
-    const { preserveNullAndEmptyArrays = false, includeArrayIndex = null } =
+    const { preserveNullAndEmptyArrays = false, includeArrayIndex = "" } =
       options;
 
     this.data({
