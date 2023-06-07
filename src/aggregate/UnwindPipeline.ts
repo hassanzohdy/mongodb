@@ -21,7 +21,7 @@ export class UnwindPipeline extends Pipeline {
     this.data({
       path: $agg.columnName(column),
       preserveNullAndEmptyArrays,
-      includeArrayIndex: includeArrayIndex || undefined,
+      // includeArrayIndex: includeArrayIndex || undefined,
     });
   }
 }
