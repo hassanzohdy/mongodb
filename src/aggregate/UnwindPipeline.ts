@@ -16,7 +16,7 @@ export class UnwindPipeline extends Pipeline {
   ) {
     super("unwind");
 
-    const { preserveNullAndEmptyArrays = false, includeArrayIndex = "" } =
+    const { preserveNullAndEmptyArrays = false, includeArrayIndex } =
       options;
 
     this.data({
