@@ -646,11 +646,11 @@ export class Model extends RelationshipModel {
         return Boolean(value);
       }
       case "date": {
-        if (isEmpty) return null;
-
         if (value instanceof Date) {
           return toUTC(value);
         }
+
+        if (isEmpty) return null;
 
         if (dayjs.isDayjs(value)) {
           return toUTC(value.toDate());
