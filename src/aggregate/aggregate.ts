@@ -15,7 +15,7 @@ import { SortByPipeline } from "./SortByPipeline";
 import { SortPipeline } from "./SortPipeline";
 import { SortRandomPipeline } from "./SortRandomPipeline";
 import { UnwindOptions, UnwindPipeline } from "./UnwindPipeline";
-import { WhereExpression } from "./WhereExpression";
+import { WhereExpression, parseValuesInObject } from "./WhereExpression";
 import { WherePipeline } from "./WherePipeline";
 import {
   $agg,
@@ -680,7 +680,7 @@ export class Aggregate {
       const results = await this.query.updateMany(this.collection, filters, [
         ...query,
         {
-          $set: data,
+          $set: parseValuesInObject(data),
         },
       ]);
 

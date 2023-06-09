@@ -17,6 +17,15 @@ function escapeRegex(value: string | RegExp, escapeOnly = false) {
   return value;
 }
 
+export function parseValuesInObject(valuesObject: any) {
+  for (const key in valuesObject) {
+    const value = valuesObject[key];
+    if (value instanceof Date) {
+      valuesObject[key] = toUTC(value);
+    }
+  }
+}
+
 export class WhereExpression {
   /**
    * Operators list
@@ -62,9 +71,9 @@ export class WhereExpression {
     value: any,
   ): Filter;
   public static parse(...args: any[]) {
-    if (args.length === 1 && Is.plainObject(args[0])) return args[0];
+    if (args.length === 1 && Is.plainObject(args[0]))
+      return parseValuesInObject(args[0]);
 
-    // eslint-disable-next-line prefer-const
     const column: string = args[0];
     let operator: WhereOperator = args[1];
     let value: any = args[2];
@@ -91,10 +100,6 @@ export class WhereExpression {
       value = new RegExp(`${value}$`);
     }
 
-    let expression = {
-      [WhereExpression.operators[operator as WhereOperator]]: value,
-    };
-
     if (value instanceof Date) {
       value = toUTC(value);
     } else if (Array.isArray(value)) {
@@ -106,6 +111,10 @@ export class WhereExpression {
         return item;
       });
     }
+
+    let expression = {
+      [WhereExpression.operators[operator as WhereOperator]]: value,
+    };
 
     if (operator === "in" && typeof value === "string") {
       expression = {
