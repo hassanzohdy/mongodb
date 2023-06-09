@@ -24,6 +24,8 @@ export function parseValuesInObject(valuesObject: any) {
       valuesObject[key] = toUTC(value);
     }
   }
+
+  return valuesObject;
 }
 
 export class WhereExpression {

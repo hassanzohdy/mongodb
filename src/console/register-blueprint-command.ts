@@ -4,7 +4,7 @@ import { BluePrint } from "./../blueprint";
 import { setMigrationsList } from "./../migrate";
 import { connectToDatabase } from "./../utils";
 
-function parseBluePrint(data: any) {
+export function parseBluePrint(data: any) {
   const schema: any = {};
   for (const column in data) {
     let columnType = data[column];

@@ -16,12 +16,12 @@ export class UnwindPipeline extends Pipeline {
   ) {
     super("unwind");
 
-    const { preserveNullAndEmptyArrays = false, includeArrayIndex } = options;
+    const { preserveNullAndEmptyArrays = false, ...moreOptions } = options;
 
     this.data({
       path: $agg.columnName(column),
       preserveNullAndEmptyArrays,
-      // includeArrayIndex: includeArrayIndex || undefined,
+      ...moreOptions,
     });
   }
 }

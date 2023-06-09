@@ -8,7 +8,7 @@ export class RelationshipWithMany<T> {
   public constructor(
     protected model: Model,
     protected relatedModel: typeof Model,
-    protected column: string
+    protected column: string,
   ) {
     //
   }
@@ -46,7 +46,7 @@ export class RelationshipWithMany<T> {
 
     const embeddedDocumentsIds = embeddedDocuments.map(
       // because it may be an array of ids or an array of documents
-      (document: ModelDocument) => document.id || document
+      (document: ModelDocument) => document.id || document,
     );
 
     const documents = (await (this.relatedModel as any).list({

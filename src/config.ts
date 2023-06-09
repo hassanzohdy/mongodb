@@ -3,7 +3,7 @@ import { DatabaseConfigurations } from "./types";
 let configurations: Partial<DatabaseConfigurations> = {};
 
 export function setDatabaseConfigurations(
-  databaseConfigurations: DatabaseConfigurations
+  databaseConfigurations: DatabaseConfigurations,
 ) {
   configurations = {
     ...configurations,
