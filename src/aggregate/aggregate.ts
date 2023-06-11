@@ -17,15 +17,7 @@ import { SortRandomPipeline } from "./SortRandomPipeline";
 import { UnwindOptions, UnwindPipeline } from "./UnwindPipeline";
 import { WhereExpression, parseValuesInObject } from "./WhereExpression";
 import { WherePipeline } from "./WherePipeline";
-import {
-  $agg,
-  addToSet,
-  count,
-  dayOfMonth,
-  last,
-  month,
-  year,
-} from "./expressions";
+import { $agg, count, dayOfMonth, last, month, year } from "./expressions";
 import { parsePipelines } from "./parsePipelines";
 import { Pipeline } from "./pipeline";
 import { WhereOperator } from "./types";
@@ -289,9 +281,9 @@ export class Aggregate {
    * Get distinct value for the given column using aggregation
    */
   public async distinct(column: string) {
-    return await this.groupBy(column, {
-      [column]: addToSet(column),
-    }).get(record => record[column]);
+    return (await this.groupBy(column).get(record => record._id)).filter(
+      value => value !== null,
+    );
   }
 
   /**
