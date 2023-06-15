@@ -85,7 +85,7 @@ export abstract class RelationshipModel extends CrudModel {
   public reassociate(
     this: Model,
     column: string,
-    model: Model | ModelDocument,
+    model: Model | ModelDocument | any,
     embedWith?: string,
   ) {
     const columnValue =
@@ -101,7 +101,7 @@ export abstract class RelationshipModel extends CrudModel {
     const documentsList = clone(this.get(column, []));
 
     const index = documentsList.findIndex(
-      (doc: any) => doc.id === columnValue.id,
+      (doc: any) => (doc?.id || doc) === (columnValue?.id || columnValue),
     );
 
     if (index === -1) {
@@ -121,7 +121,7 @@ export abstract class RelationshipModel extends CrudModel {
   public associate(
     this: Model,
     column: string,
-    model: Model | ModelDocument,
+    model: Model | ModelDocument | any,
     embedWith?: string,
   ) {
     const columnValue =
@@ -148,7 +148,7 @@ export abstract class RelationshipModel extends CrudModel {
   public disassociate(
     this: Model,
     column: string,
-    model: Model | ModelDocument,
+    model: Model | ModelDocument | any,
   ) {
     const columnValue = model instanceof Model ? model.embeddedData : model;
 
@@ -159,7 +159,7 @@ export abstract class RelationshipModel extends CrudModel {
     if (!Array.isArray(documentsList)) return this;
 
     const index = documentsList.findIndex(
-      (doc: any) => doc.id === columnValue.id,
+      (doc: any) => (doc?.id || doc) === (columnValue?.id || columnValue),
     );
 
     if (index !== -1) {

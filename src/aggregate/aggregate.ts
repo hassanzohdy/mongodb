@@ -47,7 +47,7 @@ export class Aggregate {
 
     events.collection = collection;
 
-    events.trigger("aggregating", this);
+    events.trigger("fetching", this);
   }
 
   /**

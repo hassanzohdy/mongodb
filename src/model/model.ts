@@ -360,6 +360,10 @@ export class Model extends RelationshipModel {
         // check if the data has changed
         // if not changed, then do not do anything
 
+        if (cast) {
+          await this.castData();
+        }
+
         if (this.shouldUpdate(this.originalData, this.data) === false) {
           return this;
         }
@@ -373,10 +377,6 @@ export class Model extends RelationshipModel {
         if (updatedAtColumn) {
           // updateAtColumn is supposed to be part of the Schema
           (this.data as any)[updatedAtColumn] = new Date();
-        }
-
-        if (cast) {
-          await this.castData();
         }
 
         if (triggerEvents) {
