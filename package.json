@@ -1,6 +1,6 @@
 {
     "name": "@mongez/mongodb",
-    "version": "1.0.65",
+    "version": "1.0.66",
     "description": "Powerful Mongodb Database Manager for Node Js",
     "main": "src/index.ts",
     "dependencies": {
@@ -27,9 +27,9 @@
     "devDependencies": {
         "@types/jest": "^29.5.2",
         "console-table-printer": "^2.11.1",
-        "commander": "^10.0.1",
+        "commander": "^11.0.0",
         "chalk": "^4",
-        "eslint": "^8.42.0",
+        "eslint": "^8.43.0",
         "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-prettier": "^4.2.1",
         "eslint-plugin-unused-imports": "^2.0.0",

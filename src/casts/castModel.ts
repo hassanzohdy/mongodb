@@ -26,11 +26,23 @@ export function castModel(
         )
         .get();
 
-      return records
+      const documents = records
         .map(record => {
           return getModelData(record, embeddedKey);
         })
         .filter(value => !Is.empty(value));
+
+      // now we need to order documents same as the value
+      const orderedDocuments: any[] = [];
+
+      for (const item of value) {
+        const document = documents.find(document => document.id === item.id);
+        if (document) {
+          orderedDocuments.push(document);
+        }
+      }
+
+      return orderedDocuments;
     }
 
     if (value instanceof Model) return getModelData(value, embeddedKey);
