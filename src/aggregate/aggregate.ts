@@ -41,7 +41,7 @@ export class Aggregate {
   /**
    * Constructor
    */
-  public constructor(protected readonly collection: string) {
+  public constructor(public readonly collection: string) {
     // get the events instance
     const events = Aggregate._events;
 
