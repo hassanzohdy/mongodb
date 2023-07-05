@@ -1,3 +1,5 @@
+import events from "@mongez/events";
+import { Random } from "@mongez/reinforcements";
 import {
   AggregateOptions,
   CountDocumentsOptions,
@@ -9,12 +11,37 @@ import {
 } from "mongodb";
 import { Database, database } from "../database";
 import { Document, Filter, ModelDocument } from "../model/types";
+import {
+  CountedEventPayload,
+  CountingEventPayload,
+  CreatedEventPayload,
+  CreatingEventPayload,
+  DeletedEventPayload,
+  DeletingEventPayload,
+  ExplainedEventPayload,
+  ExplainingEventPayload,
+  FetchedEventPayload,
+  FetchingEventPayload,
+  ReplacedEventPayload,
+  ReplacingEventPayload,
+  SavedEventPayload,
+  SavingEventPayload,
+  UpdatedEventPayload,
+  UpdatingEventPayload,
+  UpsertedEventPayload,
+  UpsertingEventPayload,
+} from "./types";
 
 export class Query {
   /**
    * Connection instance
    */
   protected database: Database = database;
+
+  /**
+   * class event name
+   */
+  public eventName = "mongodb.query." + Random.id();
 
   /**
    * Set the database instance
@@ -38,12 +65,27 @@ export class Query {
   public async create(collection: string, data: Document) {
     const query = this.query(collection);
 
+    await this.trigger("creating saving", {
+      collection,
+      data,
+      query,
+      isMany: false,
+    });
+
     const result = await query.insertOne(data);
 
-    return {
+    const document = {
       ...data,
       _id: result.insertedId,
     } as ModelDocument;
+
+    await this.trigger("created saved", {
+      collection,
+      document,
+      isMany: false,
+    });
+
+    return document;
   }
 
   /**
@@ -52,12 +94,27 @@ export class Query {
   public async createMany(collection: string, data: Document[]) {
     const query = this.query(collection);
 
+    await this.trigger("creating saving", {
+      collection,
+      data,
+      query,
+      isMany: true,
+    });
+
     const result = await query.insertMany(data);
 
-    return data.map((data, index) => ({
+    const documents = data.map((data, index) => ({
       ...data,
       _id: result.insertedIds[index],
     }));
+
+    await this.trigger("created saved", {
+      collection,
+      documents,
+      isMany: true,
+    });
+
+    return documents;
   }
 
   /**
@@ -71,6 +128,14 @@ export class Query {
     // get the query of the current collection
     const query = this.query(collection);
 
+    await this.trigger("updating saving", {
+      collection,
+      filter,
+      data,
+      query,
+      isMany: false,
+    });
+
     const result = await query.findOneAndUpdate(
       filter,
       {
@@ -81,7 +146,17 @@ export class Query {
       },
     );
 
-    return result.ok ? result.value : null;
+    const output = result.ok ? result.value : null;
+
+    await this.trigger("updated saved", {
+      collection,
+      filter,
+      data,
+      document: output,
+      isMany: false,
+    });
+
+    return output;
   }
 
   /**
@@ -90,10 +165,31 @@ export class Query {
   public async updateMany(
     collection: string,
     filter: Filter,
-    update: UpdateFilter<Document>,
+    updateOptions: UpdateFilter<Document>,
     options?: UpdateOptions,
   ) {
-    return await this.query(collection).updateMany(filter, update, options);
+    const query = this.query(collection);
+    await this.trigger("updating saving", {
+      collection,
+      filter,
+      updateOptions,
+      options,
+      query,
+      isMany: true,
+    });
+
+    const result = await query.updateMany(filter, updateOptions, options);
+
+    await this.trigger("updated saved", {
+      collection,
+      filter,
+      updateOptions,
+      options,
+      result: result,
+      isMany: true,
+    });
+
+    return result;
   }
 
   /**
@@ -106,11 +202,27 @@ export class Query {
   ): Promise<Partial<ModelDocument> | null> {
     const query = this.query(collection);
 
+    await this.trigger("replacing saving", {
+      collection,
+      filter,
+      data,
+      query,
+    });
+
     const result = await query.findOneAndReplace(filter, data, {
       returnDocument: "after",
     });
 
-    return result.ok ? result.value : null;
+    const output = result.ok ? result.value : null;
+
+    await this.trigger("replaced saved", {
+      collection,
+      filter,
+      data,
+      output,
+    });
+
+    return output;
   }
 
   /**
@@ -125,6 +237,13 @@ export class Query {
     // get the query of the current collection
     const query = this.query(collection);
 
+    await this.trigger("upserting saving", {
+      collection,
+      filter,
+      data,
+      query,
+    });
+
     // execute the update operation
     const result = await query.findOneAndUpdate(
       filter,
@@ -137,7 +256,16 @@ export class Query {
       },
     );
 
-    return result.ok ? result.value : null;
+    const output = result.ok ? result.value : null;
+
+    await this.trigger("upserted saved", {
+      collection,
+      filter,
+      data,
+      output,
+    });
+
+    return output;
   }
 
   /**
@@ -149,9 +277,25 @@ export class Query {
   ): Promise<boolean> {
     const query = this.query(collection);
 
+    await this.trigger("deleting", {
+      collection,
+      filter,
+      query,
+    });
+
     const result = await query.deleteOne(filter);
 
-    return result.deletedCount > 0;
+    const isDeleted = result.deletedCount > 0;
+
+    await this.trigger("deleted", {
+      collection,
+      filter,
+      isDeleted,
+      count: result.deletedCount,
+      result,
+    });
+
+    return isDeleted;
   }
 
   /**
@@ -163,9 +307,27 @@ export class Query {
   ): Promise<number> {
     const query = this.query(collection);
 
+    await this.trigger("deleting", {
+      collection,
+      filter,
+      query,
+      isMany: true,
+    });
+
     const result = await query.deleteMany(filter);
 
-    return result.deletedCount;
+    const output = result.deletedCount;
+
+    await this.trigger("deleted", {
+      collection,
+      filter,
+      output,
+      result,
+      count: result.deletedCount,
+      isMany: true,
+    });
+
+    return output;
   }
 
   /**
@@ -178,7 +340,23 @@ export class Query {
   ) {
     const query = this.query(collection);
 
-    return await query.findOne<T>(filter, findOptions);
+    await this.trigger("fetching", {
+      collection,
+      filter,
+      query,
+      findOptions,
+      first: true,
+    });
+
+    const output = await query.findOne<T>(filter, findOptions);
+
+    await this.trigger("fetched", {
+      collection,
+      filter,
+      output,
+    });
+
+    return output;
   }
 
   /**
@@ -191,6 +369,13 @@ export class Query {
   ) {
     const query = this.query(collection);
 
+    await this.trigger("fetching", {
+      collection,
+      filter,
+      query,
+      options,
+    });
+
     const results = await query
       .find(filter, options)
       .sort({
@@ -199,7 +384,15 @@ export class Query {
       .limit(1)
       .toArray();
 
-    return results.length > 0 ? results[0] : null;
+    const output = results.length > 0 ? results[0] : null;
+
+    await this.trigger("fetched", {
+      collection,
+      filter,
+      output,
+    });
+
+    return output;
   }
 
   /**
@@ -213,13 +406,31 @@ export class Query {
   ) {
     const query = this.query(collection);
 
+    await this.trigger("fetching", {
+      collection,
+      filter,
+      query,
+      findOptions,
+      isMany: true,
+    });
+
     const findOperation = query.find(filter, findOptions);
 
     if (queryHandler) {
       queryHandler(findOperation);
     }
 
-    return await findOperation.toArray();
+    const documents = await findOperation.toArray();
+
+    await this.trigger(this.eventName + ".fetched", {
+      collection,
+      filter,
+      documents,
+      findOptions,
+      isMany: true,
+    });
+
+    return documents;
   }
 
   /**
@@ -232,12 +443,30 @@ export class Query {
   ) {
     const query = this.query(collection);
 
-    return await query
+    await this.trigger("fetching", {
+      collection,
+      filter,
+      query,
+      findOptions,
+      isMany: true,
+    });
+
+    const documents = await query
       .find(filter, findOptions)
       .sort({
         id: "desc",
       })
       .toArray();
+
+    await this.trigger("fetched", {
+      collection,
+      filter,
+      documents,
+      findOptions,
+      isMany: true,
+    });
+
+    return documents;
   }
 
   /**
@@ -250,7 +479,23 @@ export class Query {
   ) {
     const query = this.query(collection);
 
-    return await query.distinct(field, filter);
+    await this.trigger("fetching", {
+      collection,
+      filter,
+      query,
+      isMany: true,
+    });
+
+    const data = await query.distinct(field, filter);
+
+    await this.trigger("fetched", {
+      collection,
+      filter,
+      data,
+      isMany: true,
+    });
+
+    return data;
   }
 
   /**
@@ -261,7 +506,23 @@ export class Query {
     filter: Filter = {},
     options?: CountDocumentsOptions,
   ) {
-    return await this.query(collection).countDocuments(filter, options);
+    const query = this.query(collection);
+
+    await this.trigger("counting", {
+      collection,
+      filter,
+      query,
+    });
+
+    const output = await query.countDocuments(filter, options);
+
+    await this.trigger("counted", {
+      collection,
+      filter,
+      output,
+    });
+
+    return output;
   }
 
   /**
@@ -273,12 +534,28 @@ export class Query {
     findOptions?: FindOptions,
     verbosity?: ExplainVerbosityLike,
   ) {
-    return await this.query(collection)
+    const query = this.query(collection);
+
+    await this.trigger("explaining", {
+      collection,
+      filter,
+      query,
+    });
+
+    const result = await query
       .find(filter, {
         ...(findOptions || {}),
         explain: true,
       })
       .explain(verbosity);
+
+    await this.trigger("explained", {
+      collection,
+      filter,
+      result,
+    });
+
+    return result;
   }
 
   /**
@@ -289,7 +566,207 @@ export class Query {
     pipeline: Document[],
     options?: AggregateOptions,
   ) {
-    return this.query(collection).aggregate(pipeline, options);
+    const query = this.query(collection);
+
+    await this.trigger("aggregating", {
+      collection,
+      pipeline,
+      options,
+      query,
+    });
+
+    const aggregate = await query.aggregate(pipeline, options);
+
+    await this.trigger("aggregated", {
+      collection,
+      pipeline,
+      options,
+      aggregate,
+    });
+
+    return aggregate;
+  }
+
+  /**
+   * Trigger event
+   */
+  public async trigger(eventName: string, payload: Record<string, any> = {}) {
+    return Promise.all(
+      eventName
+        .split(" ")
+        .map(async eventName =>
+          events.triggerAllAsync(this.eventName + "." + eventName, payload),
+        ),
+    );
+  }
+
+  /**
+   * Listen on creating event
+   */
+  public onCreating(callback: (payload: CreatingEventPayload) => void) {
+    this.on("creating", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on created event
+   */
+  public onCreated(callback: (payload: CreatedEventPayload) => void) {
+    this.on("created", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on updating event
+   */
+  public onUpdating(callback: (payload: UpdatingEventPayload) => void) {
+    this.on("updating", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on updated event
+   */
+  public onUpdated(callback: (payload: UpdatedEventPayload) => void) {
+    this.on("updated", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on upserting event
+   */
+  public onUpserting(callback: (payload: UpsertingEventPayload) => void) {
+    this.on("upserting", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on upserted event
+   */
+  public onUpserted(callback: (payload: UpsertedEventPayload) => void) {
+    this.on("upserted", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on replacing event
+   */
+  public onReplacing(callback: (payload: ReplacingEventPayload) => void) {
+    this.on("replacing", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on replaced event
+   */
+  public onReplaced(callback: (payload: ReplacedEventPayload) => void) {
+    this.on("replaced", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on saving event
+   */
+  public onSaving(callback: (payload: SavingEventPayload) => void) {
+    this.on("saving", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on saved event
+   */
+  public onSaved(callback: (payload: SavedEventPayload) => void) {
+    this.on("saved", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on fetching event
+   */
+  public onFetching(callback: (payload: FetchingEventPayload) => void) {
+    this.on("fetching", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on fetched event
+   */
+  public onFetched(callback: (payload: FetchedEventPayload) => void) {
+    this.on("fetched", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on counting event
+   */
+  public onCounting(callback: (payload: CountingEventPayload) => void) {
+    this.on("counting", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on counted event
+   */
+  public onCounted(callback: (payload: CountedEventPayload) => void) {
+    this.on("counted", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on explaining event
+   */
+  public onExplaining(callback: (payload: ExplainingEventPayload) => void) {
+    this.on("explaining", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on explained event
+   */
+  public onExplained(callback: (payload: ExplainedEventPayload) => void) {
+    this.on("explained", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on deleting event
+   */
+  public onDeleting(callback: (payload: DeletingEventPayload) => void) {
+    this.on("deleting", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen on deleted event
+   */
+  public onDeleted(callback: (payload: DeletedEventPayload) => void) {
+    this.on("deleted", callback);
+
+    return this;
+  }
+
+  /**
+   * Listen to the given event
+   */
+  public on(event: string, callback: (payload: any) => void) {
+    events.on(this.eventName + "." + event, callback);
   }
 }
 
