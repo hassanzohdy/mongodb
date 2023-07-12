@@ -588,9 +588,12 @@ export class Model extends RelationshipModel {
         value = await castType[0](value, column, this);
       } else if (Array.isArray(value) && castType !== "localized") {
         // if cast type is array, then we'll keep the value as it is
+
         if (castType !== "array") {
           value = await Promise.all(
-            value.map(async item => await castValue(item)),
+            value.map(async item => {
+              return await castValue(item);
+            }),
           );
         }
       } else {
@@ -795,7 +798,7 @@ export class Model extends RelationshipModel {
    */
   public isDirty(column?: string) {
     if (!column) {
-      return areEqual(this.data, this.originalData) === false;
+      return areEqual(clone(this.data), clone(this.originalData)) === false;
     }
 
     if (this.isNewModel()) return true;
@@ -803,7 +806,7 @@ export class Model extends RelationshipModel {
     const currentValue = get(this.data, column);
     const originalValue = get(this.originalData, column);
 
-    return areEqual(currentValue, originalValue) === false;
+    return areEqual(clone(currentValue), clone(originalValue)) === false;
   }
 
   /**

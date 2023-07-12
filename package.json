@@ -1,6 +1,6 @@
 {
     "name": "@mongez/mongodb",
-    "version": "1.0.68",
+    "version": "1.0.69",
     "description": "Powerful Mongodb Database Manager for Node Js",
     "main": "src/index.ts",
     "dependencies": {
