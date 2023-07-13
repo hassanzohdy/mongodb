@@ -267,6 +267,13 @@ export class Model extends RelationshipModel {
   }
 
   /**
+   * Get initial value of the given column
+   */
+  public getInitial(column: keyof Schema, defaultValue?: any) {
+    return get(this.initialData, column as string, defaultValue);
+  }
+
+  /**
    * Get value of the given column
    */
   public get(column: keyof Schema, defaultValue?: any) {
