@@ -139,6 +139,10 @@ export abstract class CrudModel extends BaseModel {
       for (const model of models) {
         model.unset("deletedAt");
 
+        if (model.id) {
+          model.set("id", Number(model.id));
+        }
+
         await model.save();
       }
 
@@ -158,6 +162,12 @@ export abstract class CrudModel extends BaseModel {
 
     for (const document of documents) {
       const model = this.self(document.document);
+
+      if (model.id) {
+        model.set("id", Number(model.id));
+      }
+
+      model.unset("deletedAt");
 
       model.markAsRestored();
 

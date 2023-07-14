@@ -35,7 +35,7 @@ export class WhereExpression {
   public static readonly operators: Record<WhereOperator, MongoDBOperator> = {
     "=": "$eq",
     "!=": "$ne",
-    not: "$ne",
+    not: "$not",
     ">": "$gt",
     ">=": "$gte",
     "<": "$lt",
@@ -60,6 +60,8 @@ export class WhereExpression {
     notLike: "$regex",
     startsWith: "$regex",
     endsWith: "$regex",
+    notStartsWith: "$regex",
+    notEndsWith: "$regex",
   };
 
   /**
@@ -100,6 +102,21 @@ export class WhereExpression {
     } else if (operator === "endsWith") {
       value = escapeRegex(value, true);
       value = new RegExp(`${value}$`);
+    } else if (operator === "notStartsWith") {
+      value = escapeRegex(value, true);
+      value = {
+        $regex: new RegExp(`^${value}`),
+      };
+
+      operator = "not";
+    } else if (operator === "notEndsWith") {
+      value = escapeRegex(value, true);
+
+      value = {
+        $regex: new RegExp(`${value}$`),
+      };
+
+      operator = "not";
     }
 
     if (value instanceof Date) {

@@ -344,13 +344,12 @@ export class Model extends RelationshipModel {
     {
       triggerEvents = true,
       cast = true,
+      forceUpdate = false,
     }: {
       triggerEvents?: boolean;
       cast?: boolean;
-    } = {
-      triggerEvents: true,
-      cast: true,
-    },
+      forceUpdate?: boolean;
+    } = {},
   ) {
     try {
       if (mergedData) {
@@ -368,7 +367,7 @@ export class Model extends RelationshipModel {
         // if not changed, then do not do anything
 
         if (cast) {
-          await this.castData();
+          await this.castData(forceUpdate);
         }
 
         if (this.shouldUpdate(this.originalData, this.data) === false) {
@@ -568,9 +567,9 @@ export class Model extends RelationshipModel {
   /**
    * Cast data before saving
    */
-  protected async castData() {
+  protected async castData(forceUpdate = false) {
     for (const column in this.casts) {
-      if (!this.isDirty(column)) {
+      if (!forceUpdate && !this.isDirty(column)) {
         continue;
       }
 

@@ -26,6 +26,8 @@ export const whereOperators = [
   "notLike",
   "startsWith",
   "endsWith",
+  "notStartsWith",
+  "notEndsWith",
 ] as const;
 
 // export type WhereOperator  where it is  type is one of where operator's array values
@@ -35,6 +37,7 @@ export type MongoDBOperator =
   | "$eq"
   | "$ne"
   | "$gt"
+  | "$not"
   | "$gte"
   | "$lt"
   | "$lte"

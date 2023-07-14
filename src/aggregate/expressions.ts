@@ -552,6 +552,12 @@ export function divide(...columns: string[]) {
   };
 }
 
+export function expr(expression: any) {
+  return {
+    $expr: expression,
+  };
+}
+
 export const $agg = {
   // list all aggregation functions
   count,
@@ -612,4 +618,5 @@ export const $agg = {
   booleanCond,
   cond,
   regex,
+  expr,
 };

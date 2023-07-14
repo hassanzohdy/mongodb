@@ -15,7 +15,11 @@ import { SortByPipeline } from "./SortByPipeline";
 import { SortPipeline } from "./SortPipeline";
 import { SortRandomPipeline } from "./SortRandomPipeline";
 import { UnwindOptions, UnwindPipeline } from "./UnwindPipeline";
-import { WhereExpression, parseValuesInObject } from "./WhereExpression";
+import {
+  WhereExpression,
+  parseValuesInObject,
+  toOperator,
+} from "./WhereExpression";
 import { WherePipeline } from "./WherePipeline";
 import { $agg, count, dayOfMonth, last, month, year } from "./expressions";
 import { parsePipelines } from "./parsePipelines";
@@ -355,6 +359,25 @@ export class Aggregate {
   }
 
   /**
+   * Add comparison between two or more columns
+   */
+  public whereColumns(
+    column1: string,
+    operator: WhereOperator,
+    ...otherColumns: string[]
+  ) {
+    const mongoOperator = toOperator(operator) || operator;
+    return this.where(
+      $agg.expr({
+        [mongoOperator]: [
+          $agg.columnName(column1),
+          ...otherColumns.map(column => $agg.columnName(column)),
+        ],
+      }),
+    );
+  }
+
+  /**
    * Or Where stage
    */
   public orWhere(column: GenericObject) {
@@ -397,10 +420,24 @@ export class Aggregate {
   }
 
   /**
+   * Where column not starts with the given value
+   */
+  public whereNotStartsWith(column: string, value: string | number) {
+    return this.where(column, "notStartsWith", value);
+  }
+
+  /**
    * Where column ends with the given value
    */
   public whereEndsWith(column: string, value: string | number) {
     return this.where(column, "endsWith", value);
+  }
+
+  /**
+   * Where column not ends with the given value
+   */
+  public whereNotEndsWith(column: string, value: string | number) {
+    return this.where(column, "notEndsWith", value);
   }
 
   /**
