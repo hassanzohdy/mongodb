@@ -120,6 +120,8 @@ export abstract class CrudModel extends BaseModel {
 
     const model = this.self(document);
 
+    model.unset("deletedAt");
+
     model.markAsRestored();
 
     await model.save(); // save again in the same collection
@@ -172,6 +174,72 @@ export abstract class CrudModel extends BaseModel {
       model.markAsRestored();
 
       await model.save();
+
+      models.push(model);
+    }
+
+    return models;
+  }
+
+  /**
+   * Get deleted document by id
+   */
+  public static async getDeleted<T>(
+    this: ChildModel<T>,
+    id: PrimaryIdType,
+  ): Promise<T | null> {
+    const deleteStrategy = this.deleteStrategy;
+
+    if (deleteStrategy === ModelDeleteStrategy.softDelete) {
+      const model = await this.query.first(this.collection, {
+        id,
+      });
+
+      if (!model) return null;
+
+      return model as T;
+    }
+
+    const result = await this.query.first(
+      this.collection + "Trash",
+      this.prepareFilters({
+        [this.primaryIdColumn]: id,
+      }),
+    );
+
+    if (!result) return null;
+
+    const document = result.document;
+
+    // otherwise, create a new model with it
+    const model = this.self(document);
+
+    return model;
+  }
+
+  /**
+   * Get all deleted documents
+   */
+  public static async getAllDeleted<T>(this: ChildModel<T>, filter?: Filter) {
+    const deleteStrategy = this.deleteStrategy;
+
+    if (deleteStrategy === ModelDeleteStrategy.softDelete) {
+      return await this.query.list(this.collection, filter);
+    }
+
+    if (filter) {
+      for (const key in filter) {
+        filter[`document.` + key] = filter[key];
+        delete filter[key];
+      }
+    }
+
+    const documents = await this.query.list(this.collection + "Trash", filter);
+
+    const models = [];
+
+    for (const document of documents) {
+      const model = this.self(document.document);
 
       models.push(model);
     }
